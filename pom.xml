@@ -14,7 +14,10 @@
 	<properties>
 		<java.version>14</java.version>
 		<kafka.version>2.5.0</kafka.version>
+		<kafka.streams.version>2.5.0</kafka.streams.version>
 		<slf4j.version>1.7.30</slf4j.version>
+		<logback.version>1.2.3</logback.version>
+		<moshi.version>1.9.3</moshi.version>
 		<junit.jupiter.version>5.6.2</junit.jupiter.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -22,8 +25,8 @@
 
 	<!-- BUILD -->
 	<build>
-		<plugins>
 
+		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
@@ -34,6 +37,7 @@
 					</compilerArgs>
 					<forceJavacCompilerUse>true</forceJavacCompilerUse>
 					<parameters>true</parameters>
+					<showDeprecation>true</showDeprecation>
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
@@ -63,14 +67,28 @@
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka-streams</artifactId>
-			<version>${kafka.version}</version>
+			<version>${kafka.streams.version}</version>
 		</dependency>
 
 		<!-- LOG4J -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
+			<artifactId>slf4j-api</artifactId>
 			<version>${slf4j.version}</version>
+		</dependency>
+
+		<!-- LOGBACK -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>${logback.version}</version>
+		</dependency>
+
+		<!-- MOSHI (JSON) -->
+		<dependency>
+			<groupId>com.squareup.moshi</groupId>
+			<artifactId>moshi</artifactId>
+			<version>${moshi.version}</version>
 		</dependency>
 
 		<!--JUNIT 5 -->
@@ -78,6 +96,14 @@
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
 			<version>${junit.jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- KAFKA STREAMS TEST -->
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka-streams-test-utils</artifactId>
+			<version>${kafka.streams.version}</version>
 			<scope>test</scope>
 		</dependency>
 
