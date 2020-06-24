@@ -1,8 +1,12 @@
 package com.github.smeucci.geo.data.kafka.producer;
 
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -17,6 +21,8 @@ public class GeoDataProducer {
 
 	private static final Logger log = LoggerFactory.getLogger(GeoDataProducer.class);
 
+	private static final GeoDataConverter converter = new GeoDataConverter();
+
 	public static void main(String[] args) throws Exception {
 
 		// create Producer properties
@@ -29,33 +35,36 @@ public class GeoDataProducer {
 		// create the producer
 		KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
 
-		// create geo data json converter
-		GeoDataConverter converter = new GeoDataConverter();
+		// create scheduler
+		final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+		executorService.scheduleAtFixedRate(() -> produce(producer), 0, 1, TimeUnit.SECONDS);
 
 		// add shutdown hook
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			producer.flush();
-			producer.close();
+			terminate(producer);
 		}));
 
-		while (true) {
+	}
 
-			GeoData geoData = GeoData.generate();
+	private static void produce(Producer<String, String> producer) {
 
-			log.info("{}", geoData);
+		GeoData geoData = GeoData.generate();
 
-			String json = converter.toJson(geoData);
+		log.info("{}", geoData);
 
-			// create a producer record
-			ProducerRecord<String, String> record = new ProducerRecord<String, String>(
-					GeoDataConfig.Topic.SOURCE_GEO_DATA.topicName(), json);
+		String json = converter.toJson(geoData);
 
-			producer.send(record);
+		// create a producer record
+		ProducerRecord<String, String> record = new ProducerRecord<String, String>(
+				GeoDataConfig.Topic.SOURCE_GEO_DATA.topicName(), json);
 
-			Thread.sleep(1000);
+		producer.send(record);
 
-		}
+	}
 
+	private static void terminate(Producer<String, String> producer) {
+		producer.flush();
+		producer.close();
 	}
 
 }
