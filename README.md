@@ -1,1 +1,1 @@
-# geo-data-kafka-streaming
+# geo-data-kafka
