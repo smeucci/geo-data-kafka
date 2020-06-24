@@ -13,6 +13,7 @@ services:
            ZOOKEEPER_TICK_TIME: 2000
        networks:
            - gdk-network
+       restart: always
 
    kafka-gdk:
        image: confluentinc/cp-kafka:5.5.0
@@ -33,6 +34,7 @@ services:
            - gdk-network
        depends_on:
            - zookeeper-gdk
+       restart: on-failure
            
    kafka-setup-gdk:
        image: confluentinc/cp-kafka:5.5.0
@@ -54,6 +56,7 @@ services:
            - gdk-network
        depends_on:
            - kafka-gdk
+       restart: on-failure
        
 networks:
    gdk-network:
