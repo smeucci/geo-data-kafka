@@ -1,0 +1,84 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.github.smeucci</groupId>
+	<artifactId>geo-data-kafka</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>Geo Data Kafka</name>
+	<description>Project to Learn Kafka APIs</description>
+
+	<!-- PROPERTIES -->
+	<properties>
+		<java.version>14</java.version>
+		<kafka.version>2.5.0</kafka.version>
+		<slf4j.version>1.7.30</slf4j.version>
+		<junit.jupiter.version>5.6.2</junit.jupiter.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
+
+	<!-- BUILD -->
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<release>${java.version}</release>
+					<compilerArgs>
+						<arg>--enable-preview</arg>
+					</compilerArgs>
+					<forceJavacCompilerUse>true</forceJavacCompilerUse>
+					<parameters>true</parameters>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M5</version>
+				<configuration>
+					<argLine>--enable-preview</argLine>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<!-- DEPENDENCIES -->
+	<dependencies>
+
+		<!-- KAFKA -->
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka-clients</artifactId>
+			<version>${kafka.version}</version>
+		</dependency>
+
+		<!-- KAFKA STREAMS -->
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka-streams</artifactId>
+			<version>${kafka.version}</version>
+		</dependency>
+
+		<!-- LOG4J -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+
+		<!--JUNIT 5 -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>${junit.jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+
+</project>
