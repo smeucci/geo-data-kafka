@@ -34,11 +34,6 @@ public class FilterAndCountByHemisphere {
 
 	}
 
-	/**
-	 * Filter and count southern geo data
-	 * 
-	 * @param geoDataStream The source geo data stream
-	 */
 	public static void southern(KStream<String, String> geoDataStream) {
 
 		geoDataStream
