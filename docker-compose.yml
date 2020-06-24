@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+
+   zookeeper-gdk:
+       image: confluentinc/cp-zookeeper:5.5.0
+       container_name: zookeeper-gdk
+       hostname: zookeeper-gdk
+       ports:
+           - 2181:2181
+       environment:
+           ZOOKEEPER_CLIENT_PORT: 2181
+           ZOOKEEPER_TICK_TIME: 2000
+       networks:
+           - gdk-network
+
+   kafka-gdk:
+       image: confluentinc/cp-kafka:5.5.0
+       container_name: kafka-gdk
+       hostname: kafka-gdk
+       ports:
+           - 29092:29092
+           - 9092:9092
+       environment:
+           KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka-gdk:29092,LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092
+           KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
+           KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
+           KAFKA_ZOOKEEPER_CONNECT: "zookeeper-gdk:2181"
+           KAFKA_BROKER_ID: 1
+           KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+           KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+       networks:
+           - gdk-network
+       depends_on:
+           - zookeeper-gdk
+           
+   kafka-setup-gdk:
+       image: confluentinc/cp-kafka:5.5.0
+       container_name: kafka-setup-gdk
+       hostname: kafka-setup-gdk
+       command: "bash -c 'echo Waiting for Kafka to be ready... && \
+                   cub kafka-ready -b kafka-gdk:29092 1 20 && \
+                   kafka-topics --zookeeper zookeeper-gdk:2181 --create --if-not-exists --topic source.geo.data --partitions 3 --replication-factor 1 && \
+                   kafka-topics --zookeeper zookeeper-gdk:2181 --create --if-not-exists --topic northern.hemisphere.geo.data --partitions 3 --replication-factor 1 && \
+                   kafka-topics --zookeeper zookeeper-gdk:2181 --create --if-not-exists --topic southern.hemisphere.geo.data --partitions 3 --replication-factor 1 && \
+                   kafka-topics --zookeeper zookeeper-gdk:2181 --create --if-not-exists --topic hemisphere.geo.data.statistics --partitions 3 --replication-factor 1 \
+                     --config cleanup.policy=compact \
+                     --config min.cleanable.dirty.ratio=0.005 \
+                     --config segment.ms=10000'"
+       environment:
+           KAFKA_BROKER_ID: ignored
+           KAFKA_ZOOKEEPER_CONNECT: ignored
+       networks:
+           - gdk-network
+       depends_on:
+           - kafka-gdk
+       
+networks:
+   gdk-network:
+      name: gdk-network
+      driver: bridge
+      attachable: true
