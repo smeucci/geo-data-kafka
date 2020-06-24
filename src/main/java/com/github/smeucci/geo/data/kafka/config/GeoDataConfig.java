@@ -3,8 +3,8 @@ package com.github.smeucci.geo.data.kafka.config;
 public class GeoDataConfig {
 
 	public enum Server {
-		ZOOKEEPER(""),
-		KAFKA("");
+		ZOOKEEPER("localhost:2181"),
+		KAFKA("localhost:9092");
 
 		private final String address;
 
