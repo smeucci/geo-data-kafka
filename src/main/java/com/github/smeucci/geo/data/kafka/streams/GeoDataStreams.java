@@ -10,7 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.smeucci.geo.data.kafka.config.GeoDataConfig;
+import com.github.smeucci.geo.data.kafka.streams.processing.CountByHemisphere;
 import com.github.smeucci.geo.data.kafka.streams.processing.FilterAndCountByHemisphere;
+import com.github.smeucci.geo.data.kafka.streams.processing.FilterByHemisphere;
 
 public class GeoDataStreams {
 
@@ -28,8 +30,7 @@ public class GeoDataStreams {
 		KStream<String, String> geoDataStream = streamsBuilder.stream(GeoDataConfig.Topic.SOURCE_GEO_DATA.topicName());
 
 		// filter by hemisphere and count occurrences for each
-		FilterAndCountByHemisphere.northern(geoDataStream);
-		FilterAndCountByHemisphere.southern(geoDataStream);
+		filterAndCountByEmisphere(geoDataStream);
 
 		// build the topology
 		Topology topology = streamsBuilder.build();
@@ -46,6 +47,17 @@ public class GeoDataStreams {
 		// add shutdown hook
 		Runtime.getRuntime().addShutdownHook(new Thread(kafkaStreams::close));
 
+	}
+
+	public static void filterAndCountByEmisphereCompact(KStream<String, String> geoDataStream) {
+		FilterAndCountByHemisphere.northern(geoDataStream);
+		FilterAndCountByHemisphere.southern(geoDataStream);
+	}
+
+	public static void filterAndCountByEmisphere(KStream<String, String> geoDataStream) {
+		FilterByHemisphere.northern(geoDataStream);
+		FilterByHemisphere.southern(geoDataStream);
+		CountByHemisphere.count(geoDataStream);
 	}
 
 }
