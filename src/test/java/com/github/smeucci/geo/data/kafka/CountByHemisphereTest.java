@@ -56,7 +56,7 @@ public class CountByHemisphereTest {
 		// create stream from topic
 		KStream<String, String> geoDataStream = streamsBuilder.stream(GeoDataConfig.Topic.SOURCE_GEO_DATA.topicName());
 
-		// filter by hemisphere and count occurrences for each
+		// count by hemisphere topology
 		CountByHemisphere.count(geoDataStream);
 
 		// build the topology
