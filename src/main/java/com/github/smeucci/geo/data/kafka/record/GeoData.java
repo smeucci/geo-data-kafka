@@ -16,4 +16,28 @@ public record GeoData(long timestamp, double latitude, double longitude) {
 
 	}
 
+	public static GeoData generateNorthen() {
+
+		long timestamp = Instant.now().toEpochMilli();
+
+		double latitude = (Math.random() * (-90)) + 90;
+
+		double longitude = (Math.random() * 360) - 180;
+
+		return new GeoData(timestamp, latitude, longitude);
+
+	}
+
+	public static GeoData generateSouthern() {
+
+		long timestamp = Instant.now().toEpochMilli();
+
+		double latitude = (Math.random() * 90) - 90;
+
+		double longitude = (Math.random() * 360) - 180;
+
+		return new GeoData(timestamp, latitude, longitude);
+
+	}
+
 }
