@@ -89,4 +89,22 @@ public final class GeoDataConfig {
 
 	}
 
+	public static Properties testStreamsProperties() {
+
+		// create properties
+		Properties properties = new Properties();
+		properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+		properties.setProperty(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.StringSerde.class.getName());
+		properties.setProperty(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.StringSerde.class.getName());
+
+		// disable caching so that data is processing as it arrives
+		properties.setProperty(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, "0");
+
+		properties.setProperty(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "dummy:1234");
+		properties.setProperty(StreamsConfig.APPLICATION_ID_CONFIG, "test");
+
+		return properties;
+
+	}
+
 }
