@@ -16,7 +16,7 @@ public class CountByHemisphere {
 	public static void count(KStream<String, String> geoDataStream) {
 
 		KeyValueBytesStoreSupplier countByHemisphereStoreSupplier = Stores
-				.inMemoryKeyValueStore(GeoDataConfig.Store.COUNT_BY_HEMISPHERE.storeName());
+				.persistentKeyValueStore(GeoDataConfig.Store.COUNT_BY_HEMISPHERE.storeName());
 
 		// count geo data occurrences by hemisphere
 		KStream<String, Long> hemisphereStatsStream = geoDataStream

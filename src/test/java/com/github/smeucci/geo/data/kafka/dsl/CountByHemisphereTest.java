@@ -131,6 +131,8 @@ public class CountByHemisphereTest {
 		KeyValueStore<String, Long> store = testDriver
 				.getKeyValueStore(GeoDataConfig.Store.COUNT_BY_HEMISPHERE.storeName());
 
+		Assertions.assertTrue(store.persistent());
+
 		log.info("Number of entries in store: {}", store.approximateNumEntries());
 
 		KeyValueIterator<String, Long> iterator = store.all();
