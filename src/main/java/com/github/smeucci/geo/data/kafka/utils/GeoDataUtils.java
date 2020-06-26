@@ -26,6 +26,11 @@ public class GeoDataUtils {
 			geoData) -> GeoDataUtils.extractLatitude(geoData) < 0;
 
 	/**
+	 * Predicate is in equator
+	 */
+	public static Predicate<String, String> isInEquator = (key, geoData) -> GeoDataUtils.extractLatitude(geoData) == 0;
+
+	/**
 	 * KeyValueMapper to get the key name for hemisphere
 	 */
 	public static KeyValueMapper<String, String, String> keyForHemisphere = (key,

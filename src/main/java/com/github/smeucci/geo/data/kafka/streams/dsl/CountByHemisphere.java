@@ -16,8 +16,7 @@ public class CountByHemisphere {
 		// count geo data occurrences by hemisphere
 		KStream<String, Long> hemisphereStatsStream = geoDataStream
 				// geo data with latitude == 0 doesn't belong to either hemisphere
-				.filterNot((k, v) -> GeoDataUtils.extractLatitude(v) == 0,
-						Named.as(GeoDataConfig.Processor.FILTER_EQUATOR.processorName()))
+				.filterNot(GeoDataUtils.isInEquator, Named.as(GeoDataConfig.Processor.FILTER_EQUATOR.processorName()))
 				// change key, use hemisphere
 				.selectKey(GeoDataUtils.keyForHemisphere,
 						Named.as(GeoDataConfig.Processor.SELECT_KEY_HEMISPHERE.processorName()))
