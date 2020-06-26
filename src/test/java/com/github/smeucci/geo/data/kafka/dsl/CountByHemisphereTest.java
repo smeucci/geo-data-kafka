@@ -1,8 +1,7 @@
-package com.github.smeucci.geo.data.kafka;
+package com.github.smeucci.geo.data.kafka.dsl;
 
 import java.util.Map;
 import java.util.Properties;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.kafka.common.serialization.LongDeserializer;
@@ -14,6 +13,8 @@ import org.apache.kafka.streams.TestOutputTopic;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.TopologyTestDriver;
 import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.state.KeyValueIterator;
+import org.apache.kafka.streams.state.KeyValueStore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +30,7 @@ import com.github.smeucci.geo.data.kafka.config.GeoDataConfig;
 import com.github.smeucci.geo.data.kafka.converter.GeoDataConverter;
 import com.github.smeucci.geo.data.kafka.record.GeoData;
 import com.github.smeucci.geo.data.kafka.streams.processing.CountByHemisphere;
+import com.github.smeucci.geo.data.kafka.utils.UtilityForTest;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CountByHemisphereTest {
@@ -62,6 +64,8 @@ public class CountByHemisphereTest {
 		// build the topology
 		Topology topology = streamsBuilder.build();
 
+		log.info("{}", topology.describe());
+
 		// setup test driver
 		testDriver = new TopologyTestDriver(topology, properties);
 
@@ -89,23 +93,15 @@ public class CountByHemisphereTest {
 
 	@Test
 	@Order(1)
-	@DisplayName("Test Count By Hemisphere")
-	public void testCountByHemisphere() {
+	@DisplayName("Test Count By Hemisphere Topic")
+	public void testCountByHemisphereTopic() {
 
 		log.info("==> testCountByHemisphere...");
 
 		int numNorthern = 15;
 		int numSouthern = 10;
 
-		log.info("Generating {} northern hemisphere geo data...", numNorthern);
-
-		Stream<GeoData> northernStream = IntStream.range(0, numNorthern).mapToObj(i -> GeoData.generateNorthen());
-
-		log.info("Generating {} southern hemisphere geo data...", numSouthern);
-
-		Stream<GeoData> southernStream = IntStream.range(0, numSouthern).mapToObj(i -> GeoData.generateSouthern());
-
-		Stream<GeoData> geoDataStream = Stream.concat(northernStream, southernStream);
+		Stream<GeoData> geoDataStream = UtilityForTest.generateGeoDataStream(numNorthern, numSouthern);
 
 		log.info("Producing geo data to the input topic...");
 
@@ -121,6 +117,44 @@ public class CountByHemisphereTest {
 		Assertions.assertEquals(numSouthern, map.get(GeoDataConfig.Key.SOUTHERN_HEMISPHERE.keyValue()));
 
 		Assertions.assertTrue(outputTopic.isEmpty());
+
+	}
+
+	@Test
+	@Order(2)
+	@DisplayName("Test Count By Hemisphere State Store")
+	public void testCountByHemisphereStateStore() {
+
+		log.info("==> testCountByHemisphereStateStore");
+
+		int numNorthern = 15;
+		int numSouthern = 10;
+
+		Stream<GeoData> geoDataStream = UtilityForTest.generateGeoDataStream(numNorthern, numSouthern);
+
+		log.info("Producing geo data to the input topic...");
+
+		geoDataStream.map(converter::toJson).forEach(inputTopic::pipeInput);
+
+		log.info("Querying the geo data statistics state store");
+
+		KeyValueStore<String, Long> store = testDriver
+				.getKeyValueStore(GeoDataConfig.Store.COUNT_BY_HEMISPHERE.storeName());
+
+		log.info("Number of entries in store: {}", store.approximateNumEntries());
+
+		KeyValueIterator<String, Long> iterator = store.all();
+
+		log.info("Iterating over store entries...");
+
+		while (iterator.hasNext()) {
+			log.info("{}", iterator.next());
+		}
+
+		Assertions.assertEquals(numNorthern, store.get(GeoDataConfig.Key.NORTHERN_HEMISPHERE.keyValue()));
+		Assertions.assertEquals(numSouthern, store.get(GeoDataConfig.Key.SOUTHERN_HEMISPHERE.keyValue()));
+
+		Assertions.assertFalse(outputTopic.isEmpty());
 
 	}
 
