@@ -143,6 +143,8 @@ public class CountByHemisphereTest {
 			log.info("{}", iterator.next());
 		}
 
+		iterator.close();
+
 		Assertions.assertEquals(numNorthern, store.get(GeoDataConfig.Key.NORTHERN_HEMISPHERE.keyValue()));
 		Assertions.assertEquals(numSouthern, store.get(GeoDataConfig.Key.SOUTHERN_HEMISPHERE.keyValue()));
 
