@@ -46,9 +46,7 @@ public class CountByHemisphereTest {
 	@BeforeEach
 	private void beforEach() {
 
-		log.info("============================================================");
-		log.info("==================== S T A R T  T E S T ====================");
-		log.info("============================================================");
+		UtilityForTest.logStart();
 
 		Properties properties = GeoDataConfig.testStreamsProperties();
 
@@ -86,8 +84,7 @@ public class CountByHemisphereTest {
 			this.testDriver.close();
 		}
 
-		log.info("============================================================");
-		log.info("============================================================");
+		UtilityForTest.logEnd();
 
 	}
 
