@@ -50,8 +50,8 @@ public class FilterByHemisphereTest {
 
 		// build the topology
 		Topology topology = new GeoDataTopology(Topic.SOURCE_GEO_DATA) //
-				.addProcessor(FilterByHemisphere::northern) //
-				.addProcessor(FilterByHemisphere::southern) //
+				.addOperator(FilterByHemisphere::northern) //
+				.addOperator(FilterByHemisphere::southern) //
 				.build();
 
 		log.info("{}", topology.describe());

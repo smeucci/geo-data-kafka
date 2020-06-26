@@ -52,7 +52,7 @@ public class CountByHemisphereTest {
 
 		// build the topology
 		Topology topology = new GeoDataTopology(Topic.SOURCE_GEO_DATA) //
-				.addProcessor(CountByHemisphere::count) //
+				.addOperator(CountByHemisphere::count) //
 				.build();
 
 		log.info("{}", topology.describe());

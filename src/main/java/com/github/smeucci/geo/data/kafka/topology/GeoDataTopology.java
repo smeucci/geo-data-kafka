@@ -22,7 +22,7 @@ public class GeoDataTopology {
 
 	}
 
-	public GeoDataTopology addProcessor(final Consumer<KStream<String, String>> processor) {
+	public GeoDataTopology addOperator(final Consumer<KStream<String, String>> processor) {
 
 		processor.accept(sourceStream);
 

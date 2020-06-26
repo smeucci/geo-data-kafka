@@ -24,9 +24,9 @@ public class GeoDataStreams {
 
 		// build the topology
 		Topology topology = new GeoDataTopology(Topic.SOURCE_GEO_DATA) //
-				.addProcessor(FilterByHemisphere::northern) //
-				.addProcessor(FilterByHemisphere::southern) //
-				.addProcessor(CountByHemisphere::count) //
+				.addOperator(FilterByHemisphere::northern) //
+				.addOperator(FilterByHemisphere::southern) //
+				.addOperator(CountByHemisphere::count) //
 				.build();
 
 		// print topology
