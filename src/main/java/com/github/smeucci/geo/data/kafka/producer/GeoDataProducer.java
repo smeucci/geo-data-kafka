@@ -46,11 +46,9 @@ public class GeoDataProducer {
 
 		log.info("{}", geoData);
 
-		String json = converter.toJson(geoData);
-
 		// create a producer record
 		ProducerRecord<String, String> record = new ProducerRecord<String, String>(
-				GeoDataConfig.Topic.SOURCE_GEO_DATA.topicName(), json);
+				GeoDataConfig.Topic.SOURCE_GEO_DATA.topicName(), converter.toJson(geoData));
 
 		producer.send(record);
 
