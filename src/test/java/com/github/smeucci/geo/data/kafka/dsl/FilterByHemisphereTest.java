@@ -104,8 +104,8 @@ public class FilterByHemisphereTest {
 		List<String> northernList = northernOutputTopic.readValuesToList();
 		List<String> southernList = southernOutputTopic.readValuesToList();
 
-		log.info("Retrieve geo data for northern hemisphere: {}", northernList.size());
-		log.info("Retrieve geo data for southern hemisphere: {}", southernList.size());
+		log.info("Retrieved geo data for northern hemisphere: {}", northernList.size());
+		log.info("Retrieved geo data for southern hemisphere: {}", southernList.size());
 
 		Assertions.assertEquals(numNorthern, northernList.size());
 		Assertions.assertEquals(numSouthern, southernList.size());
