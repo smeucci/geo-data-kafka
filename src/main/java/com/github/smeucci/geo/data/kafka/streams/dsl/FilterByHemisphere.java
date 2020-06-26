@@ -12,7 +12,7 @@ public class FilterByHemisphere {
 
 	private static final Logger log = LoggerFactory.getLogger(FilterByHemisphere.class);
 
-	public static void northern(KStream<String, String> geoDataStream) {
+	public static void northern(final KStream<String, String> geoDataStream) {
 
 		// filter for northern hemisphere geo data
 		KStream<String, String> northernHemisphereStream = geoDataStream
@@ -27,7 +27,7 @@ public class FilterByHemisphere {
 
 	}
 
-	public static void southern(KStream<String, String> geoDataStream) {
+	public static void southern(final KStream<String, String> geoDataStream) {
 
 		// filter for northern hemisphere geo data
 		KStream<String, String> southernHemisphereStream = geoDataStream

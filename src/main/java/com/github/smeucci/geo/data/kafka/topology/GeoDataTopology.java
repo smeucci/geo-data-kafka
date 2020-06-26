@@ -14,7 +14,7 @@ public class GeoDataTopology {
 
 	private final StreamsBuilder streamsBuilder;
 
-	public GeoDataTopology(GeoDataConfig.Topic topic) {
+	public GeoDataTopology(final GeoDataConfig.Topic topic) {
 
 		streamsBuilder = new StreamsBuilder();
 
@@ -22,7 +22,7 @@ public class GeoDataTopology {
 
 	}
 
-	public GeoDataTopology addProcessor(Consumer<KStream<String, String>> processor) {
+	public GeoDataTopology addProcessor(final Consumer<KStream<String, String>> processor) {
 
 		processor.accept(sourceStream);
 

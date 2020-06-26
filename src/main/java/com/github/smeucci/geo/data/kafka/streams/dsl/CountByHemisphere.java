@@ -13,7 +13,7 @@ import com.github.smeucci.geo.data.kafka.utils.GeoDataUtils;
 
 public class CountByHemisphere {
 
-	public static void count(KStream<String, String> geoDataStream) {
+	public static void count(final KStream<String, String> geoDataStream) {
 
 		KeyValueBytesStoreSupplier countByHemisphereStoreSupplier = Stores
 				.persistentKeyValueStore(GeoDataConfig.Store.COUNT_BY_HEMISPHERE.storeName());

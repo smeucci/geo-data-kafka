@@ -19,7 +19,7 @@ public abstract class JsonConverter<T> {
 
 	public abstract Class<T> getClassOfType();
 
-	public String toJson(T object) {
+	public String toJson(final T object) {
 
 		JsonAdapter<T> jsonAdapter = getJsonAdapter(getClassOfType());
 
@@ -27,7 +27,7 @@ public abstract class JsonConverter<T> {
 
 	}
 
-	public Optional<T> fromJson(String json) {
+	public Optional<T> fromJson(final String json) {
 
 		JsonAdapter<T> jsonAdapter = getJsonAdapter(getClassOfType());
 
