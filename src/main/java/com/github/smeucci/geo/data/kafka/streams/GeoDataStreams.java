@@ -10,9 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.smeucci.geo.data.kafka.config.GeoDataConfig;
-import com.github.smeucci.geo.data.kafka.streams.processing.CountByHemisphere;
-import com.github.smeucci.geo.data.kafka.streams.processing.FilterAndCountByHemisphere;
-import com.github.smeucci.geo.data.kafka.streams.processing.FilterByHemisphere;
+import com.github.smeucci.geo.data.kafka.streams.dsl.CountByHemisphere;
+import com.github.smeucci.geo.data.kafka.streams.dsl.FilterAndCountByHemisphere;
+import com.github.smeucci.geo.data.kafka.streams.dsl.FilterByHemisphere;
 
 public class GeoDataStreams {
 

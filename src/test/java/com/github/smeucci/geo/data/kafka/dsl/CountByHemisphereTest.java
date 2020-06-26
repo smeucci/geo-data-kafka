@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.github.smeucci.geo.data.kafka.config.GeoDataConfig;
 import com.github.smeucci.geo.data.kafka.converter.GeoDataConverter;
 import com.github.smeucci.geo.data.kafka.record.GeoData;
-import com.github.smeucci.geo.data.kafka.streams.processing.CountByHemisphere;
+import com.github.smeucci.geo.data.kafka.streams.dsl.CountByHemisphere;
 import com.github.smeucci.geo.data.kafka.utils.UtilityForTest;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)

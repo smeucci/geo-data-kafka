@@ -1,4 +1,4 @@
-package com.github.smeucci.geo.data.kafka.streams.processing;
+package com.github.smeucci.geo.data.kafka.streams.dsl;
 
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Named;
