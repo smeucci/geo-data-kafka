@@ -40,4 +40,27 @@ public class FilterByHemisphere {
 
 	}
 
+	@SuppressWarnings("unchecked")
+	public static void branch(final KStream<String, String> geoDataStream) {
+
+		// filter for northern hemisphere geo data
+		KStream<String, String>[] branches = geoDataStream
+				// branch by hemisphere
+				.branch(Named.as(GeoDataConfig.Processor.BRANCH_BY_HEMISPHERE.processorName()),
+						GeoDataUtils.isInNorthernHemisphere, GeoDataUtils.isInSouthernHemisphere);
+
+		branches[0]
+				// peek geo data
+				.peek((k, v) -> log.info("Northern Hemisphere: {}", v))
+				// set output topic
+				.to(GeoDataConfig.Topic.NORTHERN_HEMISPHERE_GEO_DATA.topicName());
+
+		branches[1]
+				// peek geo data
+				.peek((k, v) -> log.info("Southern Hemisphere: {}", v))
+				// set output topic
+				.to(GeoDataConfig.Topic.SOUTHERN_HEMISPHERE_GEO_DATA.topicName());
+
+	}
+
 }

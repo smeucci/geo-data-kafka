@@ -79,7 +79,8 @@ public final class GeoDataConfig {
 		FILTER_NORTHERN("filter-northern-processor"),
 		FILTER_SOUTHERN("filter-southern-processor"),
 		FILTER_EQUATOR("filter-equator-processor"),
-		SELECT_KEY_HEMISPHERE("select-key-hemisphere-processor");
+		SELECT_KEY_HEMISPHERE("select-key-hemisphere-processor"),
+		BRANCH_BY_HEMISPHERE("branch-by-hemisphere-processor");
 
 		private final String processor;
 
