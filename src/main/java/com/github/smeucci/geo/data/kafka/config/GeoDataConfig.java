@@ -59,6 +59,40 @@ public final class GeoDataConfig {
 		}
 	}
 
+	public enum Store {
+		COUNT_BY_HEMISPHERE("count-by-hemisphere-store");
+
+		private final String store;
+
+		private Store(String store) {
+			this.store = store;
+		}
+
+		public String storeName() {
+			return this.store;
+		}
+
+	}
+
+	public enum Processor {
+		COUNT_BY_HEMISPHRE("count-by-hemisphere-processor"),
+		FILTER_NORTHERN("filter-northern-processor"),
+		FILTER_SOUTHERN("filter-southern-processor"),
+		FILTER_EQUATOR("filter-equator-processor"),
+		SELECT_KEY_HEMISPHERE("select-key-hemisphere-processor");
+
+		private final String processor;
+
+		private Processor(String processor) {
+			this.processor = processor;
+		}
+
+		public String processorName() {
+			return this.processor;
+		}
+
+	}
+
 	public static Properties producerProperties() {
 
 		Properties properties = new Properties();

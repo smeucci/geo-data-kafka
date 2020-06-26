@@ -2,6 +2,7 @@ package com.github.smeucci.geo.data.kafka.streams.processing;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Named;
 import org.apache.kafka.streams.kstream.Produced;
 
@@ -15,13 +16,16 @@ public class CountByHemisphere {
 		// count geo data occurrences by hemisphere
 		KStream<String, Long> hemisphereStatsStream = geoDataStream
 				// geo data with latitude == 0 doesn't belong to either hemisphere
-				.filterNot((k, v) -> GeoDataUtils.extractLatitude(v) == 0)
+				.filterNot((k, v) -> GeoDataUtils.extractLatitude(v) == 0,
+						Named.as(GeoDataConfig.Processor.FILTER_EQUATOR.processorName()))
 				// change key, use hemisphere
-				.selectKey(GeoDataUtils.keyForHemisphere)
+				.selectKey(GeoDataUtils.keyForHemisphere,
+						Named.as(GeoDataConfig.Processor.SELECT_KEY_HEMISPHERE.processorName()))
 				// group by key
 				.groupByKey()
 				// count occurrences for each hemisphere
-				.count(Named.as("CountByHemisphere"))
+				.count(Named.as(GeoDataConfig.Processor.COUNT_BY_HEMISPHRE.processorName()),
+						Materialized.as(GeoDataConfig.Store.COUNT_BY_HEMISPHERE.storeName()))
 				// convert to stream
 				.toStream();
 
