@@ -37,7 +37,7 @@ public class GeoDataUtils {
 			geoData) -> isInNorthernHemisphere.test(key, geoData) ? GeoDataConfig.Key.NORTHERN_HEMISPHERE.keyValue()
 					: GeoDataConfig.Key.SOUTHERN_HEMISPHERE.keyValue();
 
-	public static double extractLatitude(String geoDataJson) {
+	public static double extractLatitude(final String geoDataJson) {
 
 		Optional<GeoData> optGeoData = converter.fromJson(geoDataJson);
 
