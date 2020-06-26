@@ -5,6 +5,8 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Named;
 import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.state.KeyValueBytesStoreSupplier;
+import org.apache.kafka.streams.state.Stores;
 
 import com.github.smeucci.geo.data.kafka.config.GeoDataConfig;
 import com.github.smeucci.geo.data.kafka.utils.GeoDataUtils;
@@ -12,6 +14,9 @@ import com.github.smeucci.geo.data.kafka.utils.GeoDataUtils;
 public class CountByHemisphere {
 
 	public static void count(KStream<String, String> geoDataStream) {
+
+		KeyValueBytesStoreSupplier countByHemisphereStoreSupplier = Stores
+				.inMemoryKeyValueStore(GeoDataConfig.Store.COUNT_BY_HEMISPHERE.storeName());
 
 		// count geo data occurrences by hemisphere
 		KStream<String, Long> hemisphereStatsStream = geoDataStream
@@ -24,7 +29,7 @@ public class CountByHemisphere {
 				.groupByKey()
 				// count occurrences for each hemisphere
 				.count(Named.as(GeoDataConfig.Processor.COUNT_BY_HEMISPHRE.processorName()),
-						Materialized.as(GeoDataConfig.Store.COUNT_BY_HEMISPHERE.storeName()))
+						Materialized.as(countByHemisphereStoreSupplier))
 				// convert to stream
 				.toStream();
 
