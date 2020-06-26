@@ -19,7 +19,7 @@ public class CountByHemisphere {
 				.persistentKeyValueStore(GeoDataConfig.Store.COUNT_BY_HEMISPHERE.storeName());
 
 		// count geo data occurrences by hemisphere
-		KStream<String, Long> hemisphereStatsStream = geoDataStream
+		geoDataStream
 				// geo data with latitude == 0 doesn't belong to either hemisphere
 				.filterNot(GeoDataUtils.isInEquator, Named.as(GeoDataConfig.Processor.FILTER_EQUATOR.processorName()))
 				// change key, use hemisphere
@@ -31,11 +31,9 @@ public class CountByHemisphere {
 				.count(Named.as(GeoDataConfig.Processor.COUNT_BY_HEMISPHRE.processorName()),
 						Materialized.as(countByHemisphereStoreSupplier))
 				// convert to stream
-				.toStream();
-
-		// set output topic
-		hemisphereStatsStream.to(GeoDataConfig.Topic.HEMISPHERE_GEO_DATA_STATISTICS.topicName(),
-				Produced.valueSerde(Serdes.Long()));
+				.toStream()
+				// set output topic
+				.to(GeoDataConfig.Topic.HEMISPHERE_GEO_DATA_STATISTICS.topicName(), Produced.valueSerde(Serdes.Long()));
 
 	}
 
