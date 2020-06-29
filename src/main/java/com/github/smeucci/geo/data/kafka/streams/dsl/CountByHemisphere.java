@@ -22,15 +22,15 @@ public class CountByHemisphere {
 		// count geo data occurrences by hemisphere
 		geoDataStream
 				// geo data with latitude == 0 doesn't belong to either hemisphere
-				.filterNot(GeoDataUtils.isInEquator, Named.as(GeoDataConfig.Processor.FILTER_EQUATOR.processorName()))
+				.filterNot(GeoDataUtils.isInEquator, Named.as(GeoDataConfig.Operator.FILTER_EQUATOR.operatorName()))
 				// change key, use hemisphere
 				.selectKey(GeoDataUtils.keyForHemisphere,
-						Named.as(GeoDataConfig.Processor.SELECT_KEY_HEMISPHERE.processorName()))
+						Named.as(GeoDataConfig.Operator.SELECT_KEY_HEMISPHERE.operatorName()))
 				// group by key
-				.groupByKey(Grouped.with(GeoDataConfig.Processor.GROUP_BY_HEMISPHERE.processorName(), Serdes.String(),
+				.groupByKey(Grouped.with(GeoDataConfig.Operator.GROUP_BY_HEMISPHERE.operatorName(), Serdes.String(),
 						Serdes.String()))
 				// count occurrences for each hemisphere
-				.count(Named.as(GeoDataConfig.Processor.COUNT_BY_HEMISPHERE.processorName()),
+				.count(Named.as(GeoDataConfig.Operator.COUNT_BY_HEMISPHERE.operatorName()),
 						Materialized.as(countByHemisphereStoreSupplier))
 				// convert to stream
 				.toStream()

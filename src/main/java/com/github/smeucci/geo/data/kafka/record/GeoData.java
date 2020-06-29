@@ -19,6 +19,18 @@ public record GeoData(long id, long timestamp, double latitude, double longitude
 
 	}
 
+	public static GeoData generate(Instant timestamp) {
+
+		long id = randomId();
+
+		double latitude = (Math.random() * 180) - 90;
+
+		double longitude = (Math.random() * 360) - 180;
+
+		return new GeoData(id, timestamp.toEpochMilli(), latitude, longitude);
+
+	}
+
 	public static GeoData generateNorthen() {
 
 		long id = randomId();

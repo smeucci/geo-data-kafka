@@ -22,11 +22,11 @@ public class CountLast30Minutes {
 
 		geoDataStreams
 				// group by key, i.e. the id of the geo data record
-				.groupByKey(Grouped.as(GeoDataConfig.Processor.GROUP_BY_GEO_DATA_ID.processorName()))
+				.groupByKey(Grouped.as(GeoDataConfig.Operator.GROUP_BY_GEO_DATA_ID.operatorName()))
 				// set hopping window of size 30 min with hop size of 1 min
-				.windowedBy(TimeWindows.of(Duration.ofMinutes(30)))
+				.windowedBy(TimeWindows.of(Duration.ofMinutes(30)).advanceBy(Duration.ofMinutes(1)))
 				// count occurrences in windows by group
-				.count(Named.as(GeoDataConfig.Processor.COUNT_LAST_30_MINUTES.processorName()),
+				.count(Named.as(GeoDataConfig.Operator.COUNT_LAST_30_MINUTES.operatorName()),
 						Materialized.as(countLast30MinutesStoreSupplier));
 
 	}

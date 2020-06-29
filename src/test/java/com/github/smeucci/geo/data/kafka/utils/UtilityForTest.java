@@ -1,5 +1,6 @@
 package com.github.smeucci.geo.data.kafka.utils;
 
+import java.time.Instant;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -30,6 +31,20 @@ public class UtilityForTest {
 				.map(g -> new TestRecord<Long, String>(g.id(), converter.toJson(g)));
 
 		return geoDataStream;
+
+	}
+
+	public static Stream<TestRecord<Long, String>> generateGeoDataStream(int num, Instant start, long gapSeconds) {
+
+		log.info("Generating {} data...", num);
+
+		Stream<GeoData> geoDataStream = IntStream.range(0, num)
+				.mapToObj(i -> GeoData.generate(start.plusSeconds(i * gapSeconds)));
+
+		Stream<TestRecord<Long, String>> recordStream = geoDataStream.map(
+				g -> new TestRecord<Long, String>(g.id(), converter.toJson(g), Instant.ofEpochMilli(g.timestamp())));
+
+		return recordStream;
 
 	}
 

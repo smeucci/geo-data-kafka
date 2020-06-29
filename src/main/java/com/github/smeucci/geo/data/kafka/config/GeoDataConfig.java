@@ -76,7 +76,8 @@ public final class GeoDataConfig {
 
 	}
 
-	public enum Processor {
+	public enum Operator {
+		SOURCE_GEO_DATA("source-geo-data-processor"),
 		COUNT_BY_HEMISPHERE("count-by-hemisphere-processor"),
 		FILTER_NORTHERN("filter-northern-processor"),
 		FILTER_SOUTHERN("filter-southern-processor"),
@@ -87,14 +88,14 @@ public final class GeoDataConfig {
 		GROUP_BY_GEO_DATA_ID("group-by-geo-data-id-processor"),
 		COUNT_LAST_30_MINUTES("count-last-30-minutes-processor");
 
-		private final String processor;
+		private final String operator;
 
-		private Processor(String processor) {
-			this.processor = processor;
+		private Operator(String operator) {
+			this.operator = operator;
 		}
 
-		public String processorName() {
-			return this.processor;
+		public String operatorName() {
+			return this.operator;
 		}
 
 	}

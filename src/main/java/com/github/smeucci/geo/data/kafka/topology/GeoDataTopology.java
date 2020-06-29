@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
+import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 
 import com.github.smeucci.geo.data.kafka.config.GeoDataConfig;
@@ -18,7 +19,8 @@ public class GeoDataTopology {
 
 		streamsBuilder = new StreamsBuilder();
 
-		sourceStream = streamsBuilder.stream(topic.topicName());
+		sourceStream = streamsBuilder.stream(topic.topicName(),
+				Consumed.as(GeoDataConfig.Operator.SOURCE_GEO_DATA.operatorName()));
 
 	}
 
