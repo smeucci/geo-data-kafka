@@ -119,7 +119,6 @@ public class CountEveryQuarterHourTest {
 
 		while (firstWindowTterator.hasNext()) {
 			KeyValue<Windowed<Long>, Long> wKeyValue = firstWindowTterator.next();
-			log.info("{}", wKeyValue.key);
 			firstWindowCount += wKeyValue.value;
 		}
 
@@ -148,7 +147,6 @@ public class CountEveryQuarterHourTest {
 
 		while (secondWindowTterator.hasNext()) {
 			KeyValue<Windowed<Long>, Long> wKeyValue = secondWindowTterator.next();
-			log.info("{}", wKeyValue.key);
 			secondWindowCount += wKeyValue.value;
 		}
 
