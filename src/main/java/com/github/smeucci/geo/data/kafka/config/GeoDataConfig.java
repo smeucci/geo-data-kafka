@@ -62,7 +62,8 @@ public final class GeoDataConfig {
 
 	public enum Store {
 		COUNT_BY_HEMISPHERE("count-by-hemisphere-store"),
-		COUNT_LAST_30_MINUTES("count-last-30-minutes-store");
+		COUNT_LAST_30_MINUTES("count-last-30-minutes-store"),
+		COUNT_EVERY_QUARTES_HOUR("count-every-quarter-hour-store");
 
 		private final String store;
 
@@ -86,7 +87,8 @@ public final class GeoDataConfig {
 		BRANCH_BY_HEMISPHERE("branch-by-hemisphere-processor"),
 		GROUP_BY_HEMISPHERE("group-by-hemisphere-processor"),
 		GROUP_BY_GEO_DATA_ID("group-by-geo-data-id-processor"),
-		COUNT_LAST_30_MINUTES("count-last-30-minutes-processor");
+		COUNT_LAST_30_MINUTES("count-last-30-minutes-processor"),
+		COUNT_EVERY_QUARTES_HOUR("count-every-quarter-hour-processor");
 
 		private final String operator;
 

@@ -1,13 +1,24 @@
 package com.github.smeucci.geo.data.kafka.dsl;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Properties;
+import java.util.stream.Stream;
 
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.TestInputTopic;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.TopologyTestDriver;
+import org.apache.kafka.streams.kstream.Windowed;
+import org.apache.kafka.streams.state.KeyValueIterator;
+import org.apache.kafka.streams.state.WindowStore;
+import org.apache.kafka.streams.test.TestRecord;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -71,6 +82,81 @@ public class CountEveryQuarterHourTest {
 	public void testCountEveryQuarterHourStore() {
 
 		log.info("==> testCountEveryQuarterHourStore...");
+
+		Instant start = LocalDateTime.of(2020, 1, 1, 00, 00).toInstant(ZoneOffset.UTC);
+
+		int num = 61;
+
+		Stream<TestRecord<Long, String>> geoDataStream = UtilityForTest.generateGeoDataStream(num, start, 60);
+
+		log.info("Producing geo data to the input topic...");
+
+		geoDataStream.forEach(inputTopic::pipeInput);
+
+		log.info("Querying the geo data count every quarter hour state store");
+
+		WindowStore<Long, Long> store = testDriver
+				.getWindowStore(GeoDataConfig.Store.COUNT_EVERY_QUARTES_HOUR.storeName());
+
+		Assertions.assertTrue(store.persistent());
+
+		// check window already closed
+
+		ZonedDateTime queryTime = ZonedDateTime.of(2020, 1, 1, 00, 43, 23, 12565650, ZoneOffset.UTC);
+
+		log.info("Query Time: {}", queryTime);
+
+		ZonedDateTime to = queryTime;
+		ZonedDateTime from = queryTime.minusMinutes(15);
+
+		log.info("Search Window: [{}, {}]", from, to);
+
+		KeyValueIterator<Windowed<Long>, Long> firstWindowTterator = store.fetchAll(from.toInstant(), to.toInstant());
+
+		log.info("Iterating over select window entries...");
+
+		long firstWindowCount = 0;
+
+		while (firstWindowTterator.hasNext()) {
+			KeyValue<Windowed<Long>, Long> wKeyValue = firstWindowTterator.next();
+			log.info("{}", wKeyValue.key);
+			firstWindowCount += wKeyValue.value;
+		}
+
+		firstWindowTterator.close();
+
+		log.info("First Window Count: {}", firstWindowCount);
+
+		Assertions.assertEquals(15, firstWindowCount);
+
+		// check window still open
+
+		queryTime = ZonedDateTime.of(2020, 1, 1, 01, 04, 43, 53265650, ZoneOffset.UTC);
+
+		log.info("Query Time: {}", queryTime);
+
+		to = queryTime;
+		from = queryTime.minusMinutes(15);
+
+		log.info("Search Window: [{}, {}]", from, to);
+
+		KeyValueIterator<Windowed<Long>, Long> secondWindowTterator = store.fetchAll(from.toInstant(), to.toInstant());
+
+		log.info("Iterating over selected window entries...");
+
+		long secondWindowCount = 0;
+
+		while (secondWindowTterator.hasNext()) {
+			KeyValue<Windowed<Long>, Long> wKeyValue = secondWindowTterator.next();
+			log.info("{}", wKeyValue.key);
+			secondWindowCount += wKeyValue.value;
+		}
+
+		secondWindowTterator.close();
+
+		log.info("First Window Count: {}", secondWindowCount);
+
+		Assertions.assertEquals(1, secondWindowCount);
 
 	}
 

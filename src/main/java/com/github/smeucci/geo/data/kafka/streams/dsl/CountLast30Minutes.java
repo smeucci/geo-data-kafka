@@ -14,13 +14,13 @@ import com.github.smeucci.geo.data.kafka.config.GeoDataConfig;
 
 public class CountLast30Minutes {
 
-	public static void count(final KStream<Long, String> geoDataStreams) {
+	public static void count(final KStream<Long, String> geoDataStream) {
 
 		WindowBytesStoreSupplier countLast30MinutesStoreSupplier = Stores.persistentWindowStore(
 				GeoDataConfig.Store.COUNT_LAST_30_MINUTES.storeName(), Duration.ofDays(7), Duration.ofMinutes(30),
 				false);
 
-		geoDataStreams
+		geoDataStream
 				// group by key, i.e. the id of the geo data record
 				.groupByKey(Grouped.as(GeoDataConfig.Operator.GROUP_BY_GEO_DATA_ID.operatorName()))
 				// set hopping window of size 30 min with hop size of 1 min
