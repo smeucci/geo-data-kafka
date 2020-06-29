@@ -13,6 +13,8 @@ then
 
 else
 	
-	kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic $topic
+	kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic $topic \
+		--property print.key=true \
+		--property print.value=true \
 	
 fi
