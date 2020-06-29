@@ -12,7 +12,7 @@ public class FilterByHemisphere {
 
 	private static final Logger log = LoggerFactory.getLogger(FilterByHemisphere.class);
 
-	public static void northern(final KStream<String, String> geoDataStream) {
+	public static void northern(final KStream<Long, String> geoDataStream) {
 
 		// filter for northern hemisphere geo data
 		geoDataStream
@@ -26,7 +26,7 @@ public class FilterByHemisphere {
 
 	}
 
-	public static void southern(final KStream<String, String> geoDataStream) {
+	public static void southern(final KStream<Long, String> geoDataStream) {
 
 		// filter for northern hemisphere geo data
 		geoDataStream
@@ -41,10 +41,10 @@ public class FilterByHemisphere {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void branch(final KStream<String, String> geoDataStream) {
+	public static void branch(final KStream<Long, String> geoDataStream) {
 
 		// filter for northern hemisphere geo data
-		KStream<String, String>[] branches = geoDataStream
+		KStream<Long, String>[] branches = geoDataStream
 				// branch by hemisphere
 				.branch(Named.as(GeoDataConfig.Processor.BRANCH_BY_HEMISPHERE.processorName()),
 						GeoDataUtils.isInNorthernHemisphere, GeoDataUtils.isInSouthernHemisphere);

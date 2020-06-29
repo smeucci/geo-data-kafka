@@ -4,6 +4,7 @@ import java.util.Properties;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.StreamsConfig;
@@ -60,7 +61,8 @@ public final class GeoDataConfig {
 	}
 
 	public enum Store {
-		COUNT_BY_HEMISPHERE("count-by-hemisphere-store");
+		COUNT_BY_HEMISPHERE("count-by-hemisphere-store"),
+		COUNT_LAST_30_MINUTES("count-last-30-minutes-store");
 
 		private final String store;
 
@@ -75,12 +77,15 @@ public final class GeoDataConfig {
 	}
 
 	public enum Processor {
-		COUNT_BY_HEMISPHRE("count-by-hemisphere-processor"),
+		COUNT_BY_HEMISPHERE("count-by-hemisphere-processor"),
 		FILTER_NORTHERN("filter-northern-processor"),
 		FILTER_SOUTHERN("filter-southern-processor"),
 		FILTER_EQUATOR("filter-equator-processor"),
 		SELECT_KEY_HEMISPHERE("select-key-hemisphere-processor"),
-		BRANCH_BY_HEMISPHERE("branch-by-hemisphere-processor");
+		BRANCH_BY_HEMISPHERE("branch-by-hemisphere-processor"),
+		GROUP_BY_HEMISPHERE("group-by-hemisphere-processor"),
+		GROUP_BY_GEO_DATA_ID("group-by-geo-data-id-processor"),
+		COUNT_LAST_30_MINUTES("count-last-30-minutes-processor");
 
 		private final String processor;
 
@@ -99,7 +104,7 @@ public final class GeoDataConfig {
 		Properties properties = new Properties();
 
 		properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, GeoDataConfig.Server.KAFKA.address());
-		properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+		properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class.getName());
 		properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
 		return properties;
@@ -111,7 +116,7 @@ public final class GeoDataConfig {
 		// create properties
 		Properties properties = new Properties();
 		properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-		properties.setProperty(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.StringSerde.class.getName());
+		properties.setProperty(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.LongSerde.class.getName());
 		properties.setProperty(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.StringSerde.class.getName());
 
 		// disable caching so that data is processing as it arrives
@@ -129,7 +134,7 @@ public final class GeoDataConfig {
 		// create properties
 		Properties properties = new Properties();
 		properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-		properties.setProperty(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.StringSerde.class.getName());
+		properties.setProperty(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.LongSerde.class.getName());
 		properties.setProperty(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.StringSerde.class.getName());
 
 		// disable caching so that data is processing as it arrives

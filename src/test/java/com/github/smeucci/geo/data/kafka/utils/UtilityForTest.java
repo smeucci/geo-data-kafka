@@ -3,16 +3,20 @@ package com.github.smeucci.geo.data.kafka.utils;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.apache.kafka.streams.test.TestRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.smeucci.geo.data.kafka.converter.GeoDataConverter;
 import com.github.smeucci.geo.data.kafka.record.GeoData;
 
 public class UtilityForTest {
 
 	private static final Logger log = LoggerFactory.getLogger(UtilityForTest.class);
 
-	public static Stream<GeoData> generateGeoDataStream(int numNorthern, int numSouthern) {
+	private static final GeoDataConverter converter = new GeoDataConverter();
+
+	public static Stream<TestRecord<Long, String>> generateGeoDataStream(int numNorthern, int numSouthern) {
 
 		log.info("Generating {} northern hemisphere geo data...", numNorthern);
 
@@ -22,7 +26,8 @@ public class UtilityForTest {
 
 		Stream<GeoData> southernStream = IntStream.range(0, numSouthern).mapToObj(i -> GeoData.generateSouthern());
 
-		Stream<GeoData> geoDataStream = Stream.concat(northernStream, southernStream);
+		Stream<TestRecord<Long, String>> geoDataStream = Stream.concat(northernStream, southernStream)
+				.map(g -> new TestRecord<Long, String>(g.id(), converter.toJson(g)));
 
 		return geoDataStream;
 

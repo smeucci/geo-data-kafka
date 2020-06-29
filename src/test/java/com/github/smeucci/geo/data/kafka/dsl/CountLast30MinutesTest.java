@@ -1,17 +1,19 @@
 package com.github.smeucci.geo.data.kafka.dsl;
 
-import java.util.List;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.LongSerializer;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.TestInputTopic;
-import org.apache.kafka.streams.TestOutputTopic;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.TopologyTestDriver;
+import org.apache.kafka.streams.kstream.Windowed;
+import org.apache.kafka.streams.state.KeyValueIterator;
+import org.apache.kafka.streams.state.WindowStore;
 import org.apache.kafka.streams.test.TestRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -26,19 +28,17 @@ import org.slf4j.LoggerFactory;
 
 import com.github.smeucci.geo.data.kafka.config.GeoDataConfig;
 import com.github.smeucci.geo.data.kafka.config.GeoDataConfig.Topic;
-import com.github.smeucci.geo.data.kafka.streams.dsl.FilterByHemisphere;
+import com.github.smeucci.geo.data.kafka.streams.dsl.CountLast30Minutes;
 import com.github.smeucci.geo.data.kafka.topology.GeoDataTopology;
 import com.github.smeucci.geo.data.kafka.utils.UtilityForTest;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class FilterByHemisphereTest {
+public class CountLast30MinutesTest {
 
-	private static final Logger log = LoggerFactory.getLogger(FilterByHemisphereTest.class);
+	private static final Logger log = LoggerFactory.getLogger(CountByHemisphereTest.class);
 
 	private TopologyTestDriver testDriver;
 	private TestInputTopic<Long, String> inputTopic;
-	private TestOutputTopic<Long, String> northernOutputTopic;
-	private TestOutputTopic<Long, String> southernOutputTopic;
 
 	@BeforeEach
 	private void beforEach() {
@@ -49,8 +49,7 @@ public class FilterByHemisphereTest {
 
 		// build the topology
 		Topology topology = new GeoDataTopology(Topic.SOURCE_GEO_DATA) //
-				.addOperator(FilterByHemisphere::northern) //
-				.addOperator(FilterByHemisphere::southern) //
+				.addOperator(CountLast30Minutes::count) //
 				.build();
 
 		log.info("{}", topology.describe());
@@ -61,13 +60,6 @@ public class FilterByHemisphereTest {
 		// create test input topic
 		inputTopic = testDriver.createInputTopic(GeoDataConfig.Topic.SOURCE_GEO_DATA.topicName(), new LongSerializer(),
 				new StringSerializer());
-
-		// create test output
-		northernOutputTopic = testDriver.createOutputTopic(GeoDataConfig.Topic.NORTHERN_HEMISPHERE_GEO_DATA.topicName(),
-				new LongDeserializer(), new StringDeserializer());
-
-		southernOutputTopic = testDriver.createOutputTopic(GeoDataConfig.Topic.SOUTHERN_HEMISPHERE_GEO_DATA.topicName(),
-				new LongDeserializer(), new StringDeserializer());
 
 	}
 
@@ -84,10 +76,10 @@ public class FilterByHemisphereTest {
 
 	@Test
 	@Order(1)
-	@DisplayName("Test Filter By Hemisphere")
-	public void testFilterByHemisphereTopic() {
+	@DisplayName("Test Count Last 30 Minutes Store")
+	public void testCountLast30MinutesStore() {
 
-		log.info("==> testFilterByHemisphereTopic");
+		log.info("==> testCountLast30MinutesStore...");
 
 		int numNorthern = 15;
 		int numSouthern = 10;
@@ -98,19 +90,30 @@ public class FilterByHemisphereTest {
 
 		geoDataStream.forEach(inputTopic::pipeInput);
 
-		log.info("Consuming geo data statistics by hemisphere from output topic...");
+		log.info("Querying the geo data statistics state store");
 
-		List<String> northernList = northernOutputTopic.readValuesToList();
-		List<String> southernList = southernOutputTopic.readValuesToList();
+		WindowStore<Long, Long> store = testDriver
+				.getWindowStore(GeoDataConfig.Store.COUNT_LAST_30_MINUTES.storeName());
 
-		log.info("Retrieved geo data for northern hemisphere: {}", northernList.size());
-		log.info("Retrieved geo data for southern hemisphere: {}", southernList.size());
+		Assertions.assertTrue(store.persistent());
 
-		Assertions.assertEquals(numNorthern, northernList.size());
-		Assertions.assertEquals(numSouthern, southernList.size());
+		Instant now = Instant.now();
 
-		Assertions.assertTrue(northernOutputTopic.isEmpty());
-		Assertions.assertTrue(southernOutputTopic.isEmpty());
+		KeyValueIterator<Windowed<Long>, Long> iterator = store.fetchAll(now.minus(30, ChronoUnit.MINUTES), now);
+
+		log.info("Iterating over store entries...");
+
+		long totalCount = 0;
+
+		while (iterator.hasNext()) {
+			KeyValue<Windowed<Long>, Long> wKeyValue = iterator.next();
+			log.info("{}", wKeyValue);
+			totalCount += wKeyValue.value;
+		}
+
+		iterator.close();
+
+		Assertions.assertEquals(numNorthern + numSouthern, totalCount);
 
 	}
 

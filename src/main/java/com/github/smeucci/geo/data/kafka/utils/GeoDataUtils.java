@@ -16,24 +16,24 @@ public class GeoDataUtils {
 	/**
 	 * Predicate is in northern hemisphere
 	 */
-	public static Predicate<String, String> isInNorthernHemisphere = (key,
+	public static Predicate<Long, String> isInNorthernHemisphere = (key,
 			geoData) -> GeoDataUtils.extractLatitude(geoData) > 0;
 
 	/**
 	 * Predicate is in southern hemisphere
 	 */
-	public static Predicate<String, String> isInSouthernHemisphere = (key,
+	public static Predicate<Long, String> isInSouthernHemisphere = (key,
 			geoData) -> GeoDataUtils.extractLatitude(geoData) < 0;
 
 	/**
 	 * Predicate is in equator
 	 */
-	public static Predicate<String, String> isInEquator = (key, geoData) -> GeoDataUtils.extractLatitude(geoData) == 0;
+	public static Predicate<Long, String> isInEquator = (key, geoData) -> GeoDataUtils.extractLatitude(geoData) == 0;
 
 	/**
 	 * KeyValueMapper to get the key name for hemisphere
 	 */
-	public static KeyValueMapper<String, String, String> keyForHemisphere = (key,
+	public static KeyValueMapper<Long, String, String> keyForHemisphere = (key,
 			geoData) -> isInNorthernHemisphere.test(key, geoData) ? GeoDataConfig.Key.NORTHERN_HEMISPHERE.keyValue()
 					: GeoDataConfig.Key.SOUTHERN_HEMISPHERE.keyValue();
 

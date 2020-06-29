@@ -27,7 +27,7 @@ public class GeoDataProducer {
 		Properties properties = GeoDataConfig.producerProperties();
 
 		// create the producer
-		KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
+		KafkaProducer<Long, String> producer = new KafkaProducer<Long, String>(properties);
 
 		// create scheduler
 		final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
@@ -40,21 +40,24 @@ public class GeoDataProducer {
 
 	}
 
-	private static void produce(Producer<String, String> producer) {
+	private static void produce(Producer<Long, String> producer) {
 
 		GeoData geoData = GeoData.generate();
 
 		log.info("{}", geoData);
 
+		String topic = GeoDataConfig.Topic.SOURCE_GEO_DATA.topicName();
+		Long key = geoData.id();
+		String value = converter.toJson(geoData);
+
 		// create a producer record
-		ProducerRecord<String, String> record = new ProducerRecord<String, String>(
-				GeoDataConfig.Topic.SOURCE_GEO_DATA.topicName(), converter.toJson(geoData));
+		ProducerRecord<Long, String> record = new ProducerRecord<Long, String>(topic, key, value);
 
 		producer.send(record);
 
 	}
 
-	private static void terminate(Producer<String, String> producer) {
+	private static void terminate(Producer<Long, String> producer) {
 		producer.flush();
 		producer.close();
 	}

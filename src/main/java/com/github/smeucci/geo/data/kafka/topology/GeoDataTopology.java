@@ -10,7 +10,7 @@ import com.github.smeucci.geo.data.kafka.config.GeoDataConfig;
 
 public class GeoDataTopology {
 
-	private final KStream<String, String> sourceStream;
+	private final KStream<Long, String> sourceStream;
 
 	private final StreamsBuilder streamsBuilder;
 
@@ -22,7 +22,7 @@ public class GeoDataTopology {
 
 	}
 
-	public GeoDataTopology addOperator(final Consumer<KStream<String, String>> processor) {
+	public GeoDataTopology addOperator(final Consumer<KStream<Long, String>> processor) {
 
 		processor.accept(sourceStream);
 

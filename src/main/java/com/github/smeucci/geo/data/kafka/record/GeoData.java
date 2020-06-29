@@ -1,10 +1,13 @@
 package com.github.smeucci.geo.data.kafka.record;
 
 import java.time.Instant;
+import java.util.concurrent.ThreadLocalRandom;
 
-public record GeoData(long timestamp, double latitude, double longitude) {
+public record GeoData(long id, long timestamp, double latitude, double longitude) {
 
 	public static GeoData generate() {
+
+		long id = randomId();
 
 		long timestamp = Instant.now().toEpochMilli();
 
@@ -12,11 +15,13 @@ public record GeoData(long timestamp, double latitude, double longitude) {
 
 		double longitude = (Math.random() * 360) - 180;
 
-		return new GeoData(timestamp, latitude, longitude);
+		return new GeoData(id, timestamp, latitude, longitude);
 
 	}
 
 	public static GeoData generateNorthen() {
+
+		long id = randomId();
 
 		long timestamp = Instant.now().toEpochMilli();
 
@@ -24,11 +29,13 @@ public record GeoData(long timestamp, double latitude, double longitude) {
 
 		double longitude = (Math.random() * 360) - 180;
 
-		return new GeoData(timestamp, latitude, longitude);
+		return new GeoData(id, timestamp, latitude, longitude);
 
 	}
 
 	public static GeoData generateSouthern() {
+
+		long id = randomId();
 
 		long timestamp = Instant.now().toEpochMilli();
 
@@ -36,7 +43,13 @@ public record GeoData(long timestamp, double latitude, double longitude) {
 
 		double longitude = (Math.random() * 360) - 180;
 
-		return new GeoData(timestamp, latitude, longitude);
+		return new GeoData(id, timestamp, latitude, longitude);
+
+	}
+
+	private static long randomId() {
+
+		return ThreadLocalRandom.current().nextLong(1, 30 + 1);
 
 	}
 

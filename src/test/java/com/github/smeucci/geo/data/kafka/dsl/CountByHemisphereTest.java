@@ -5,6 +5,7 @@ import java.util.Properties;
 import java.util.stream.Stream;
 
 import org.apache.kafka.common.serialization.LongDeserializer;
+import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.TestInputTopic;
@@ -13,6 +14,7 @@ import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.TopologyTestDriver;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.KeyValueStore;
+import org.apache.kafka.streams.test.TestRecord;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,8 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import com.github.smeucci.geo.data.kafka.config.GeoDataConfig;
 import com.github.smeucci.geo.data.kafka.config.GeoDataConfig.Topic;
-import com.github.smeucci.geo.data.kafka.converter.GeoDataConverter;
-import com.github.smeucci.geo.data.kafka.record.GeoData;
 import com.github.smeucci.geo.data.kafka.streams.dsl.CountByHemisphere;
 import com.github.smeucci.geo.data.kafka.topology.GeoDataTopology;
 import com.github.smeucci.geo.data.kafka.utils.UtilityForTest;
@@ -37,10 +37,8 @@ public class CountByHemisphereTest {
 
 	private static final Logger log = LoggerFactory.getLogger(CountByHemisphereTest.class);
 
-	private static final GeoDataConverter converter = new GeoDataConverter();
-
 	private TopologyTestDriver testDriver;
-	private TestInputTopic<String, String> inputTopic;
+	private TestInputTopic<Long, String> inputTopic;
 	private TestOutputTopic<String, Long> outputTopic;
 
 	@BeforeEach
@@ -61,8 +59,8 @@ public class CountByHemisphereTest {
 		testDriver = new TopologyTestDriver(topology, properties);
 
 		// create test input topic
-		inputTopic = testDriver.createInputTopic(GeoDataConfig.Topic.SOURCE_GEO_DATA.topicName(),
-				new StringSerializer(), new StringSerializer());
+		inputTopic = testDriver.createInputTopic(GeoDataConfig.Topic.SOURCE_GEO_DATA.topicName(), new LongSerializer(),
+				new StringSerializer());
 
 		// create test output
 		outputTopic = testDriver.createOutputTopic(GeoDataConfig.Topic.HEMISPHERE_GEO_DATA_STATISTICS.topicName(),
@@ -91,11 +89,11 @@ public class CountByHemisphereTest {
 		int numNorthern = 15;
 		int numSouthern = 10;
 
-		Stream<GeoData> geoDataStream = UtilityForTest.generateGeoDataStream(numNorthern, numSouthern);
+		Stream<TestRecord<Long, String>> geoDataStream = UtilityForTest.generateGeoDataStream(numNorthern, numSouthern);
 
 		log.info("Producing geo data to the input topic...");
 
-		geoDataStream.map(converter::toJson).forEach(inputTopic::pipeInput);
+		geoDataStream.forEach(inputTopic::pipeInput);
 
 		log.info("Consuming geo data statistics by hemisphere from output topic...");
 
@@ -120,11 +118,11 @@ public class CountByHemisphereTest {
 		int numNorthern = 15;
 		int numSouthern = 10;
 
-		Stream<GeoData> geoDataStream = UtilityForTest.generateGeoDataStream(numNorthern, numSouthern);
+		Stream<TestRecord<Long, String>> geoDataStream = UtilityForTest.generateGeoDataStream(numNorthern, numSouthern);
 
 		log.info("Producing geo data to the input topic...");
 
-		geoDataStream.map(converter::toJson).forEach(inputTopic::pipeInput);
+		geoDataStream.forEach(inputTopic::pipeInput);
 
 		log.info("Querying the geo data statistics state store");
 
