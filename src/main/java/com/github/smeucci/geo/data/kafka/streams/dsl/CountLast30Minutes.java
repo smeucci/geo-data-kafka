@@ -14,10 +14,10 @@ import com.github.smeucci.geo.data.kafka.config.GeoDataConfig;
 
 public class CountLast30Minutes {
 
-	public static void count(final KStream<Long, String> geoDataStream) {
+	public static void countById(final KStream<Long, String> geoDataStream) {
 
-		WindowBytesStoreSupplier countLast30MinutesStoreSupplier = Stores.persistentWindowStore(
-				GeoDataConfig.Store.COUNT_LAST_30_MINUTES.storeName(), Duration.ofDays(7), Duration.ofMinutes(30),
+		WindowBytesStoreSupplier countLast30MinutesByIdStoreSupplier = Stores.inMemoryWindowStore(
+				GeoDataConfig.Store.COUNT_LAST_30_MINUTES_BY_ID.storeName(), Duration.ofDays(1), Duration.ofMinutes(30),
 				false);
 
 		geoDataStream
@@ -26,8 +26,8 @@ public class CountLast30Minutes {
 				// set hopping window of size 30 min with hop size of 1 min
 				.windowedBy(TimeWindows.of(Duration.ofMinutes(30)).advanceBy(Duration.ofMinutes(1)))
 				// count occurrences in windows by group
-				.count(Named.as(GeoDataConfig.Operator.COUNT_LAST_30_MINUTES.operatorName()),
-						Materialized.as(countLast30MinutesStoreSupplier));
+				.count(Named.as(GeoDataConfig.Operator.COUNT_LAST_30_MINUTES_BY_ID.operatorName()),
+						Materialized.as(countLast30MinutesByIdStoreSupplier));
 
 	}
 

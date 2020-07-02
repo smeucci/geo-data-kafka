@@ -4,7 +4,9 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import org.apache.kafka.common.serialization.LongSerializer;
@@ -35,9 +37,9 @@ import com.github.smeucci.geo.data.kafka.topology.GeoDataTopology;
 import com.github.smeucci.geo.data.kafka.utils.UtilityForTest;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class CountEveryQuarterHourTest {
+public class CountEveryQuarterHourByIdTest {
 
-	private static final Logger log = LoggerFactory.getLogger(CountLast30MinutesTest.class);
+	private static final Logger log = LoggerFactory.getLogger(CountEveryQuarterHourByIdTest.class);
 
 	private TopologyTestDriver testDriver;
 	private TestInputTopic<Long, String> inputTopic;
@@ -51,7 +53,7 @@ public class CountEveryQuarterHourTest {
 
 		// build the topology
 		Topology topology = new GeoDataTopology(Topic.SOURCE_GEO_DATA) //
-				.addOperator(CountEveryQuarterHour::count) //
+				.addOperator(CountEveryQuarterHour::countById) //
 				.build();
 
 		log.info("{}", topology.describe());
@@ -78,10 +80,10 @@ public class CountEveryQuarterHourTest {
 
 	@Test
 	@Order(1)
-	@DisplayName("Test Count Every Quarter Hour Store")
-	public void testCountEveryQuarterHourStore() {
+	@DisplayName("Test Count Every Quarter Hour By Id Store")
+	public void testCountEveryQuarterHourByIdStore() {
 
-		log.info("==> testCountEveryQuarterHourStore...");
+		log.info("==> testCountEveryQuarterHourByIdStore...");
 
 		Instant start = LocalDateTime.of(2020, 1, 1, 00, 00).toInstant(ZoneOffset.UTC);
 
@@ -93,12 +95,34 @@ public class CountEveryQuarterHourTest {
 
 		geoDataStream.forEach(inputTopic::pipeInput);
 
-		log.info("Querying the geo data count every quarter hour state store");
+		log.info("Querying the geo data count every quarter hour by id state store");
 
 		WindowStore<Long, Long> store = testDriver
-				.getWindowStore(GeoDataConfig.Store.COUNT_EVERY_QUARTES_HOUR.storeName());
+				.getWindowStore(GeoDataConfig.Store.COUNT_EVERY_QUARTES_HOUR_BY_ID.storeName());
 
-		Assertions.assertTrue(store.persistent());
+		KeyValueIterator<Windowed<Long>, Long> iterator = store.all();
+
+		Map<String, Long> aggregateResultsByWindow = new TreeMap<>();
+
+		while (iterator.hasNext()) {
+
+			KeyValue<Windowed<Long>, Long> keyVal = iterator.next();
+
+			String aggKey = keyVal.key.window().startTime().toString() + " @ "
+					+ keyVal.key.window().endTime().toString();
+
+			Long sum = aggregateResultsByWindow.get(aggKey);
+
+			sum = sum == null ? keyVal.value : sum + keyVal.value;
+
+			aggregateResultsByWindow.put(aggKey, sum);
+
+		}
+
+		iterator.close();
+
+		log.info("Show aggregated results by window:");
+		aggregateResultsByWindow.entrySet().forEach(e -> log.info("{}", e));
 
 		// check window already closed
 
@@ -106,8 +130,9 @@ public class CountEveryQuarterHourTest {
 
 		log.info("Query Time: {}", queryTime);
 
-		ZonedDateTime to = queryTime;
-		ZonedDateTime from = queryTime.minusMinutes(15);
+		int quarter = queryTime.getMinute() - (queryTime.getMinute() % 15);
+		ZonedDateTime from = queryTime.withMinute(quarter).withSecond(0).withNano(0);
+		ZonedDateTime to = from;
 
 		log.info("Search Window: [{}, {}]", from, to);
 
@@ -134,8 +159,9 @@ public class CountEveryQuarterHourTest {
 
 		log.info("Query Time: {}", queryTime);
 
-		to = queryTime;
-		from = queryTime.minusMinutes(15);
+		quarter = queryTime.getMinute() - (queryTime.getMinute() % 15);
+		from = queryTime.withMinute(quarter).withSecond(0).withNano(0);
+		to = from;
 
 		log.info("Search Window: [{}, {}]", from, to);
 

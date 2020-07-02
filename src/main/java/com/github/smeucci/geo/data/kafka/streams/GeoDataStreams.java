@@ -9,8 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.smeucci.geo.data.kafka.config.GeoDataConfig;
 import com.github.smeucci.geo.data.kafka.config.GeoDataConfig.Topic;
-import com.github.smeucci.geo.data.kafka.streams.dsl.CountByHemisphere;
-import com.github.smeucci.geo.data.kafka.streams.dsl.FilterByHemisphere;
+import com.github.smeucci.geo.data.kafka.streams.dsl.CountLast30Minutes;
 import com.github.smeucci.geo.data.kafka.topology.GeoDataTopology;
 
 public class GeoDataStreams {
@@ -24,9 +23,7 @@ public class GeoDataStreams {
 
 		// build the topology
 		Topology topology = new GeoDataTopology(Topic.SOURCE_GEO_DATA) //
-				.addOperator(FilterByHemisphere::northern) //
-				.addOperator(FilterByHemisphere::southern) //
-				.addOperator(CountByHemisphere::count) //
+				.addOperator(CountLast30Minutes::countById) //
 				.build();
 
 		// print topology

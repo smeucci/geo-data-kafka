@@ -4,10 +4,13 @@ import java.util.Properties;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.StreamsConfig;
+
+import com.github.smeucci.geo.data.kafka.serde.ThirtyMinutesWindowDeserializer;
 
 public final class GeoDataConfig {
 
@@ -32,7 +35,8 @@ public final class GeoDataConfig {
 		SOURCE_GEO_DATA("source.geo.data"),
 		NORTHERN_HEMISPHERE_GEO_DATA("northern.hemisphere.geo.data"),
 		SOUTHERN_HEMISPHERE_GEO_DATA("southern.hemisphere.geo.data"),
-		HEMISPHERE_GEO_DATA_STATISTICS("hemisphere.geo.data.statistics");
+		HEMISPHERE_GEO_DATA_STATISTICS("hemisphere.geo.data.statistics"),
+		COUNT_LAST_30_MINUTES_GEO_DATA("count.last.30.minutes.geo.data");
 
 		private final String topicName;
 
@@ -62,6 +66,8 @@ public final class GeoDataConfig {
 
 	public enum Store {
 		COUNT_BY_HEMISPHERE("count-by-hemisphere-store"),
+		COUNT_LAST_30_MINUTES_BY_ID("count-last-30-minutes-by-id-store"),
+		COUNT_EVERY_QUARTES_HOUR_BY_ID("count-every-quarter-hour-by-id-store"),
 		COUNT_LAST_30_MINUTES("count-last-30-minutes-store"),
 		COUNT_EVERY_QUARTES_HOUR("count-every-quarter-hour-store");
 
@@ -78,17 +84,21 @@ public final class GeoDataConfig {
 	}
 
 	public enum Operator {
-		SOURCE_GEO_DATA("source-geo-data-processor"),
-		COUNT_BY_HEMISPHERE("count-by-hemisphere-processor"),
-		FILTER_NORTHERN("filter-northern-processor"),
-		FILTER_SOUTHERN("filter-southern-processor"),
-		FILTER_EQUATOR("filter-equator-processor"),
-		SELECT_KEY_HEMISPHERE("select-key-hemisphere-processor"),
-		BRANCH_BY_HEMISPHERE("branch-by-hemisphere-processor"),
-		GROUP_BY_HEMISPHERE("group-by-hemisphere-processor"),
-		GROUP_BY_GEO_DATA_ID("group-by-geo-data-id-processor"),
-		COUNT_LAST_30_MINUTES("count-last-30-minutes-processor"),
-		COUNT_EVERY_QUARTES_HOUR("count-every-quarter-hour-processor");
+		SOURCE_GEO_DATA("source-geo-data-operator"),
+		COUNT_BY_HEMISPHERE("count-by-hemisphere-operator"),
+		FILTER_NORTHERN("filter-northern-operator"),
+		FILTER_SOUTHERN("filter-southern-operator"),
+		FILTER_EQUATOR("filter-equator-operator"),
+		SELECT_KEY_HEMISPHERE("select-key-hemisphere-operator"),
+		BRANCH_BY_HEMISPHERE("branch-by-hemisphere-operator"),
+		GROUP_BY_HEMISPHERE("group-by-hemisphere-operator"),
+		GROUP_BY_GEO_DATA_ID("group-by-geo-data-id-operator"),
+		GROUP_ALL("group-all-operator"),
+		GROUP_BY_WINDOW("group-by-window-operator"),
+		COUNT_LAST_30_MINUTES_BY_ID("count-last-30-minutes-by-id-operator"),
+		COUNT_EVERY_QUARTES_HOUR_BY_ID("count-every-quarter-hour-by-id-operator"),
+		REDUCE_LAST_30_MINUTES("reduce-last-30-minutes-operator"),
+		SELECT_KEY_ALL_SAME("select-key-all-same-operator");
 
 		private final String operator;
 
@@ -109,6 +119,21 @@ public final class GeoDataConfig {
 		properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, GeoDataConfig.Server.KAFKA.address());
 		properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, LongSerializer.class.getName());
 		properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+
+		return properties;
+
+	}
+
+	public static Properties consumerProperties() {
+
+		Properties properties = new Properties();
+
+		properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+		properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, GeoDataConfig.Server.KAFKA.address());
+		properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "consumer-count-windowed-geo-data");
+		properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+				ThirtyMinutesWindowDeserializer.class.getName());
+		properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class.getName());
 
 		return properties;
 

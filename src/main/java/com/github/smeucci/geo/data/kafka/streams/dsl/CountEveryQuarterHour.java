@@ -14,11 +14,11 @@ import com.github.smeucci.geo.data.kafka.config.GeoDataConfig;
 
 public class CountEveryQuarterHour {
 
-	public static void count(final KStream<Long, String> geoDataStream) {
+	public static void countById(final KStream<Long, String> geoDataStream) {
 
-		WindowBytesStoreSupplier countEveryQuarterHourStoreSupplier = Stores.persistentWindowStore(
-				GeoDataConfig.Store.COUNT_EVERY_QUARTES_HOUR.storeName(), Duration.ofDays(1), Duration.ofMinutes(15),
-				false);
+		WindowBytesStoreSupplier countEveryQuarterHourStoreSupplier = Stores.inMemoryWindowStore(
+				GeoDataConfig.Store.COUNT_EVERY_QUARTES_HOUR_BY_ID.storeName(), Duration.ofDays(1),
+				Duration.ofMinutes(15), false);
 
 		geoDataStream
 				// group by key, i.e. the id of the geo data record
@@ -26,7 +26,7 @@ public class CountEveryQuarterHour {
 				// set hopping window of size 15 min with implicit hop size of 15 min, no overlap
 				.windowedBy(TimeWindows.of(Duration.ofMinutes(15)))
 				// count occurrences in windows by group
-				.count(Named.as(GeoDataConfig.Operator.COUNT_EVERY_QUARTES_HOUR.operatorName()),
+				.count(Named.as(GeoDataConfig.Operator.COUNT_EVERY_QUARTES_HOUR_BY_ID.operatorName()),
 						Materialized.as(countEveryQuarterHourStoreSupplier));
 
 	}

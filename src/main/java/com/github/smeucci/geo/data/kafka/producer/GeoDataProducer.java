@@ -31,7 +31,7 @@ public class GeoDataProducer {
 
 		// create scheduler
 		final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-		executorService.scheduleAtFixedRate(() -> produce(producer), 0, 1, TimeUnit.SECONDS);
+		executorService.scheduleAtFixedRate(() -> produce(producer), 0, 60, TimeUnit.SECONDS);
 
 		// add shutdown hook
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {

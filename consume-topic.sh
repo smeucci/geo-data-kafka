@@ -1,20 +1,26 @@
-echo $1 $2
+echo $1 $2 $3
 
 topic=$1
-value=${2-"string"}
+key=${2-"string"}
+value=${3-"string"}
+
+
+if [ $key == "long" ]
+then
+	keydes=org.apache.kafka.common.serialization.LongDeserializer
+else
+	keydes=org.apache.kafka.common.serialization.StringDeserializer
+fi
 
 if [ $value == "long" ]
 then
-
-	kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic $topic \
-		--property print.key=true \
-		--property print.value=true \
-		--property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer
-
+	valuedes="org.apache.kafka.common.serialization.LongDeserializer"
 else
-	
-	kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic $topic \
-		--property print.key=true \
-		--property print.value=true \
-	
+	valuedes="org.apache.kafka.common.serialization.StringDeserializer"
 fi
+
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic $topic \
+	--property print.key=true \
+	--property print.value=true \
+	--property key.deserializer=$keydes \
+	--property value.deserializer=$valuedes
