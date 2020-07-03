@@ -7,10 +7,9 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.StreamsConfig;
-
-import com.github.smeucci.geo.data.kafka.serde.ThirtyMinutesWindowDeserializer;
 
 public final class GeoDataConfig {
 
@@ -135,8 +134,7 @@ public final class GeoDataConfig {
 		properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 		properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, GeoDataConfig.Server.KAFKA.address());
 		properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "consumer-count-windowed-geo-data");
-		properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-				ThirtyMinutesWindowDeserializer.class.getName());
+		properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 		properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class.getName());
 
 		return properties;

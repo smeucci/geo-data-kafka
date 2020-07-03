@@ -61,4 +61,8 @@ public class CountEveryQuarterHour {
 
 	}
 
+	public static void countByIdAndAggregate(final KStream<Long, String> geoDataStream) {
+
+	}
+
 }
