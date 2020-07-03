@@ -136,18 +136,18 @@ public class CountLast30MinutesByIdTest {
 
 		log.info("Search Window: [{}, {}]", from, to);
 
-		KeyValueIterator<Windowed<Long>, Long> firstWindowTterator = store.fetchAll(from.toInstant(), to.toInstant());
+		KeyValueIterator<Windowed<Long>, Long> firstWindowIterator = store.fetchAll(from.toInstant(), to.toInstant());
 
 		log.info("Iterating over select window entries...");
 
 		long firstWindowCount = 0;
 
-		while (firstWindowTterator.hasNext()) {
-			KeyValue<Windowed<Long>, Long> wKeyValue = firstWindowTterator.next();
+		while (firstWindowIterator.hasNext()) {
+			KeyValue<Windowed<Long>, Long> wKeyValue = firstWindowIterator.next();
 			firstWindowCount += wKeyValue.value;
 		}
 
-		firstWindowTterator.close();
+		firstWindowIterator.close();
 
 		log.info("First Window Count: {}", firstWindowCount);
 
@@ -164,18 +164,18 @@ public class CountLast30MinutesByIdTest {
 
 		log.info("Search Window: [{}, {}]", from, to);
 
-		KeyValueIterator<Windowed<Long>, Long> secondWindowTterator = store.fetchAll(from.toInstant(), to.toInstant());
+		KeyValueIterator<Windowed<Long>, Long> secondWindowIterator = store.fetchAll(from.toInstant(), to.toInstant());
 
 		log.info("Iterating over selected window entries...");
 
 		long secondWindowCount = 0;
 
-		while (secondWindowTterator.hasNext()) {
-			KeyValue<Windowed<Long>, Long> wKeyValue = secondWindowTterator.next();
+		while (secondWindowIterator.hasNext()) {
+			KeyValue<Windowed<Long>, Long> wKeyValue = secondWindowIterator.next();
 			secondWindowCount += wKeyValue.value;
 		}
 
-		secondWindowTterator.close();
+		secondWindowIterator.close();
 
 		log.info("Second Window Count: {}", secondWindowCount);
 

@@ -102,6 +102,8 @@ public class CountEveryQuarterHourByIdTest {
 
 		KeyValueIterator<Windowed<Long>, Long> iterator = store.all();
 
+		// aggregate results by window
+
 		Map<String, Long> aggregateResultsByWindow = new TreeMap<>();
 
 		while (iterator.hasNext()) {
@@ -130,23 +132,23 @@ public class CountEveryQuarterHourByIdTest {
 		log.info("Query Time: {}", queryTime);
 
 		int quarter = queryTime.getMinute() - (queryTime.getMinute() % 15);
-		ZonedDateTime from = queryTime.withMinute(quarter).withSecond(0).withNano(0);
-		ZonedDateTime to = from;
+		Instant from = queryTime.withMinute(quarter).withSecond(0).withNano(0).toInstant();
+		Instant to = from;
 
 		log.info("Search Window: [{}, {}]", from, to);
 
-		KeyValueIterator<Windowed<Long>, Long> firstWindowTterator = store.fetchAll(from.toInstant(), to.toInstant());
+		KeyValueIterator<Windowed<Long>, Long> firstWindowIterator = store.fetchAll(from, to);
 
 		log.info("Iterating over select window entries...");
 
 		long firstWindowCount = 0;
 
-		while (firstWindowTterator.hasNext()) {
-			KeyValue<Windowed<Long>, Long> wKeyValue = firstWindowTterator.next();
+		while (firstWindowIterator.hasNext()) {
+			KeyValue<Windowed<Long>, Long> wKeyValue = firstWindowIterator.next();
 			firstWindowCount += wKeyValue.value;
 		}
 
-		firstWindowTterator.close();
+		firstWindowIterator.close();
 
 		log.info("First Window Count: {}", firstWindowCount);
 
@@ -159,23 +161,23 @@ public class CountEveryQuarterHourByIdTest {
 		log.info("Query Time: {}", queryTime);
 
 		quarter = queryTime.getMinute() - (queryTime.getMinute() % 15);
-		from = queryTime.withMinute(quarter).withSecond(0).withNano(0);
+		from = queryTime.withMinute(quarter).withSecond(0).withNano(0).toInstant();
 		to = from;
 
 		log.info("Search Window: [{}, {}]", from, to);
 
-		KeyValueIterator<Windowed<Long>, Long> secondWindowTterator = store.fetchAll(from.toInstant(), to.toInstant());
+		KeyValueIterator<Windowed<Long>, Long> secondWindowIterator = store.fetchAll(from, to);
 
 		log.info("Iterating over selected window entries...");
 
 		long secondWindowCount = 0;
 
-		while (secondWindowTterator.hasNext()) {
-			KeyValue<Windowed<Long>, Long> wKeyValue = secondWindowTterator.next();
+		while (secondWindowIterator.hasNext()) {
+			KeyValue<Windowed<Long>, Long> wKeyValue = secondWindowIterator.next();
 			secondWindowCount += wKeyValue.value;
 		}
 
-		secondWindowTterator.close();
+		secondWindowIterator.close();
 
 		log.info("Second Window Count: {}", secondWindowCount);
 

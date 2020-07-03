@@ -3,6 +3,8 @@ package com.github.smeucci.geo.data.kafka.dsl;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -152,6 +154,42 @@ public class CountEveryQuarterHourTest {
 		iterator.close();
 
 		Assertions.assertEquals(5, count);
+
+		// check window already closed
+
+		ZonedDateTime queryTime = ZonedDateTime.of(2020, 1, 1, 00, 43, 23, 12565650, ZoneOffset.UTC);
+
+		log.info("Query Time: {}", queryTime);
+
+		int quarter = queryTime.getMinute() - (queryTime.getMinute() % 15);
+		Instant from = queryTime.withMinute(quarter).withSecond(0).withNano(0).toInstant();
+		Instant to = from.plus(15, ChronoUnit.MINUTES);
+
+		log.info("Search Window: [{}, {}]", from, to);
+
+		Long firstWindowCount = store.get(from.toEpochMilli() + "/" + to.toEpochMilli());
+
+		log.info("First Window Count: {}", firstWindowCount);
+
+		Assertions.assertEquals(15, firstWindowCount);
+
+		// check window still open
+
+		queryTime = ZonedDateTime.of(2020, 1, 1, 01, 04, 43, 53265650, ZoneOffset.UTC);
+
+		log.info("Query Time: {}", queryTime);
+
+		quarter = queryTime.getMinute() - (queryTime.getMinute() % 15);
+		from = queryTime.withMinute(quarter).withSecond(0).withNano(0).toInstant();
+		to = from.plus(15, ChronoUnit.MINUTES);
+
+		log.info("Search Window: [{}, {}]", from, to);
+
+		Long secondWindowCount = store.get(from.toEpochMilli() + "/" + to.toEpochMilli());
+
+		log.info("Second Window Count: {}", secondWindowCount);
+
+		Assertions.assertEquals(1, secondWindowCount);
 
 	}
 
