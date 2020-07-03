@@ -1,5 +1,9 @@
 package com.github.smeucci.geo.data.kafka.utils;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import org.apache.kafka.streams.kstream.KeyValueMapper;
@@ -42,6 +46,28 @@ public class GeoDataUtils {
 		Optional<GeoData> optGeoData = converter.fromJson(geoDataJson);
 
 		return optGeoData.isPresent() ? optGeoData.get().latitude() : 0;
+
+	}
+
+	public static String getQuarterHourWindowAsString(String record) {
+
+		Optional<GeoData> optGeoData = converter.fromJson(record);
+
+		if (optGeoData.isEmpty()) {
+			return null;
+		}
+
+		ZonedDateTime geoDataTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(optGeoData.get().timestamp()),
+				ZoneOffset.UTC);
+
+		int quarter = geoDataTime.getMinute() - (geoDataTime.getMinute() % 15);
+
+		Instant windowStart = geoDataTime.withMinute(quarter).withSecond(0).withNano(0).toInstant();
+		Instant windowEnd = windowStart.plus(15, ChronoUnit.MINUTES);
+
+		String windowAsString = windowStart.toEpochMilli() + "/" + windowEnd.toEpochMilli();
+
+		return windowAsString;
 
 	}
 

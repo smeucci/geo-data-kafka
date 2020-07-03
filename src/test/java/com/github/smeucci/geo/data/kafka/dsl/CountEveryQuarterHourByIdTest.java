@@ -108,8 +108,7 @@ public class CountEveryQuarterHourByIdTest {
 
 			KeyValue<Windowed<Long>, Long> keyVal = iterator.next();
 
-			String aggKey = keyVal.key.window().startTime().toString() + " @ "
-					+ keyVal.key.window().endTime().toString();
+			String aggKey = keyVal.key.window().start() + "/" + keyVal.key.window().end();
 
 			Long sum = aggregateResultsByWindow.get(aggKey);
 
@@ -178,7 +177,7 @@ public class CountEveryQuarterHourByIdTest {
 
 		secondWindowTterator.close();
 
-		log.info("First Window Count: {}", secondWindowCount);
+		log.info("Second Window Count: {}", secondWindowCount);
 
 		Assertions.assertEquals(1, secondWindowCount);
 

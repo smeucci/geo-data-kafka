@@ -177,7 +177,7 @@ public class CountLast30MinutesByIdTest {
 
 		secondWindowTterator.close();
 
-		log.info("First Window Count: {}", secondWindowCount);
+		log.info("Second Window Count: {}", secondWindowCount);
 
 		Assertions.assertEquals(12, secondWindowCount);
 

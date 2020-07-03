@@ -36,7 +36,7 @@ public final class GeoDataConfig {
 		NORTHERN_HEMISPHERE_GEO_DATA("northern.hemisphere.geo.data"),
 		SOUTHERN_HEMISPHERE_GEO_DATA("southern.hemisphere.geo.data"),
 		HEMISPHERE_GEO_DATA_STATISTICS("hemisphere.geo.data.statistics"),
-		COUNT_LAST_30_MINUTES_GEO_DATA("count.last.30.minutes.geo.data");
+		COUNT_EVERY_QUARTER_HOUR_GEO_DATA("count.every.quarter.hour.geo.data");
 
 		private final String topicName;
 
@@ -94,11 +94,15 @@ public final class GeoDataConfig {
 		GROUP_BY_HEMISPHERE("group-by-hemisphere-operator"),
 		GROUP_BY_GEO_DATA_ID("group-by-geo-data-id-operator"),
 		GROUP_ALL("group-all-operator"),
-		GROUP_BY_WINDOW("group-by-window-operator"),
+		GROUP_BY_QUARTER_HOUR("group-by-quarter-hour-operator"),
 		COUNT_LAST_30_MINUTES_BY_ID("count-last-30-minutes-by-id-operator"),
 		COUNT_EVERY_QUARTES_HOUR_BY_ID("count-every-quarter-hour-by-id-operator"),
+		COUNT_EVERY_QUARTES_HOUR("count-every-quarter-hour-operator"),
 		REDUCE_LAST_30_MINUTES("reduce-last-30-minutes-operator"),
-		SELECT_KEY_ALL_SAME("select-key-all-same-operator");
+		SELECT_KEY_ALL_SAME("select-key-all-same-operator"),
+		SELECT_KEY_QUARTER_HOUR("select-key-quarter-hour-operator"),
+		TO_COUNT_EVERY_QUARTER_HOUR_STREAM("to-count-quarter-hour-stream-operator"),
+		TO_COUNT_EVERY_QUARTER_HOUR_TOPIC("to-count-quarter-hour-topic-operator");
 
 		private final String operator;
 

@@ -25,7 +25,7 @@ public class GeoDataConsumer {
 		// create the producer
 		KafkaConsumer<Windowed<String>, Long> consumer = new KafkaConsumer<Windowed<String>, Long>(properties);
 
-		consumer.subscribe(Arrays.asList(GeoDataConfig.Topic.COUNT_LAST_30_MINUTES_GEO_DATA.topicName()));
+		consumer.subscribe(Arrays.asList(GeoDataConfig.Topic.COUNT_EVERY_QUARTER_HOUR_GEO_DATA.topicName()));
 
 		// add shutdown hook
 		Runtime.getRuntime().addShutdownHook(new Thread(consumer::close));

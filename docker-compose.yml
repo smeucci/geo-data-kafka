@@ -43,13 +43,10 @@ services:
        command: "bash -c 'echo Waiting for Kafka to be ready... && \
                    cub kafka-ready -b kafka-gdk:29092 1 20 && \
                    kafka-topics --zookeeper zookeeper-gdk:2181 --create --if-not-exists --topic source.geo.data --partitions 3 --replication-factor 1 && \
+ 				   kafka-topics --zookeeper zookeeper-gdk:2181 --create --if-not-exists --topic count.every.quarter.hour.geo.data --partitions 3 --replication-factor 1 && \
                    kafka-topics --zookeeper zookeeper-gdk:2181 --create --if-not-exists --topic northern.hemisphere.geo.data --partitions 3 --replication-factor 1 && \
                    kafka-topics --zookeeper zookeeper-gdk:2181 --create --if-not-exists --topic southern.hemisphere.geo.data --partitions 3 --replication-factor 1 && \
                    kafka-topics --zookeeper zookeeper-gdk:2181 --create --if-not-exists --topic hemisphere.geo.data.statistics --partitions 3 --replication-factor 1 \
-                     --config cleanup.policy=compact \
-                     --config min.cleanable.dirty.ratio=0.005 \
-                     --config segment.ms=10000 && \
-				   kafka-topics --zookeeper zookeeper-gdk:2181 --create --if-not-exists --topic count.last.30.minutes.geo.data --partitions 3 --replication-factor 1 \
                      --config cleanup.policy=compact \
                      --config min.cleanable.dirty.ratio=0.005 \
                      --config segment.ms=10000'"
