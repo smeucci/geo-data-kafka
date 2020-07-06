@@ -1,6 +1,5 @@
 package com.github.smeucci.geo.data.kafka.dsl;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -13,14 +12,12 @@ import java.util.stream.Stream;
 
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.LongSerializer;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.TestInputTopic;
 import org.apache.kafka.streams.TestOutputTopic;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.TopologyTestDriver;
-import org.apache.kafka.streams.kstream.TimeWindowedDeserializer;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.WindowStore;
@@ -49,7 +46,7 @@ public class CountEveryQuarterHourByIdAndAggregateTest {
 
 	private TopologyTestDriver testDriver;
 	private TestInputTopic<Long, String> inputTopic;
-	private TestOutputTopic<Windowed<Long>, Long> outputTopic;
+	private TestOutputTopic<Long, Long> outputTopic;
 
 	@BeforeEach
 	private void beforEach() {
@@ -60,7 +57,7 @@ public class CountEveryQuarterHourByIdAndAggregateTest {
 
 		// build the topology
 		Topology topology = new GeoDataTopology(Topic.SOURCE_GEO_DATA) //
-				.addOperator(CountEveryQuarterHour::countByIdAndAggregate2) //
+				.addOperator(CountEveryQuarterHour::countByIdAndAggregate) //
 				.build();
 
 		log.info("{}", topology.describe());
@@ -74,8 +71,7 @@ public class CountEveryQuarterHourByIdAndAggregateTest {
 
 		// create test output topic
 		outputTopic = testDriver.createOutputTopic(GeoDataConfig.Topic.COUNT_EVERY_QUARTER_HOUR_GEO_DATA.topicName(),
-				new TimeWindowedDeserializer<>(new LongDeserializer(), Duration.ofMinutes(15).toMillis()),
-				new LongDeserializer());
+				new LongDeserializer(), new LongDeserializer());
 
 	}
 
@@ -204,7 +200,7 @@ public class CountEveryQuarterHourByIdAndAggregateTest {
 
 		log.info("==> testCountEveryQuarterHourByIdAndAggregateTopic...");
 
-		Instant start = LocalDateTime.of(2020, 1, 1, 00, 14, 01).toInstant(ZoneOffset.UTC);
+		Instant start = LocalDateTime.of(2020, 1, 1, 00, 00).toInstant(ZoneOffset.UTC);
 
 		int num = 61;
 
@@ -216,19 +212,19 @@ public class CountEveryQuarterHourByIdAndAggregateTest {
 
 		log.info("Consuming quarter hour geo data stats from output topic...");
 
-		List<KeyValue<Windowed<Long>, Long>> records = outputTopic.readKeyValuesToList();
+		List<KeyValue<Long, Long>> records = outputTopic.readKeyValuesToList();
 
-		// Assertions.assertEquals(4, records.size());
+		// returns one record more, because the first puntuaction happen as soon as the first record arrives
+		// the corresponding window will contain no results, i.e. count = 0
+		Assertions.assertEquals(5, records.size());
 
-		records.forEach(r -> {
+		records.stream().filter(r -> r.value != 0).forEach(r -> {
 
 			log.info("{}", r);
 
-			// Assertions.assertEquals(15, r.value);
+			Assertions.assertEquals(15, r.value);
 
 		});
-
-		log.info("# records: {}", records.size());
 
 		Assertions.assertTrue(outputTopic.isEmpty());
 

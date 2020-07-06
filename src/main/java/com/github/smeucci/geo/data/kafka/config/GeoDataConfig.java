@@ -101,7 +101,8 @@ public final class GeoDataConfig {
 		SELECT_KEY_ALL_SAME("select-key-all-same-operator"),
 		SELECT_KEY_QUARTER_HOUR("select-key-quarter-hour-operator"),
 		TO_COUNT_EVERY_QUARTER_HOUR_STREAM("to-count-quarter-hour-stream-operator"),
-		TO_COUNT_EVERY_QUARTER_HOUR_TOPIC("to-count-quarter-hour-topic-operator");
+		TO_COUNT_EVERY_QUARTER_HOUR_TOPIC("to-count-quarter-hour-topic-operator"),
+		AGGREGATE_BY_WINDOW_TRANSFORMER("aggregate-by-window-transformer-operator");
 
 		private final String operator;
 

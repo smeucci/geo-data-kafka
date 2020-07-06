@@ -14,6 +14,7 @@ import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.processor.PunctuationType;
+import org.apache.kafka.streams.processor.To;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.TimestampedWindowStore;
 import org.apache.kafka.streams.state.ValueAndTimestamp;
@@ -29,7 +30,7 @@ public class AggregateQuarterHourCountByWindowProcessor implements Processor<Win
 
 	private TimestampedWindowStore<Long, Long> store;
 
-	private Map<String, Long> windowMap = new TreeMap<>();
+	private Map<Long, Long> windowMap = new TreeMap<>();
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -62,11 +63,11 @@ public class AggregateQuarterHourCountByWindowProcessor implements Processor<Win
 
 				log.info("{}", kv);
 
-				Long total = windowMap.get(kv.key.window().toString());
+				Long total = windowMap.get(kv.key.window().start());
 
 				total = total == null ? kv.value.value() : total + kv.value.value();
 
-				windowMap.put(kv.key.window().toString(), total);
+				windowMap.put(kv.key.window().start(), total);
 
 			}
 
@@ -76,7 +77,11 @@ public class AggregateQuarterHourCountByWindowProcessor implements Processor<Win
 			windowMap.entrySet().forEach(e -> log.info("{}", e));
 
 			// forward to topic
-			// TODO
+			Long total = windowMap.get(from.toEpochMilli());
+			
+			if (total != null) {
+				context.forward(from.toEpochMilli(), total);
+			}
 
 		});
 
