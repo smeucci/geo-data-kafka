@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import org.apache.kafka.streams.kstream.KeyValueMapper;
 import org.apache.kafka.streams.kstream.Predicate;
+import org.apache.kafka.streams.kstream.Windowed;
 
 import com.github.smeucci.geo.data.kafka.config.GeoDataConfig;
 import com.github.smeucci.geo.data.kafka.converter.GeoDataConverter;
@@ -66,6 +67,14 @@ public class GeoDataUtils {
 		Instant windowEnd = windowStart.plus(15, ChronoUnit.MINUTES);
 
 		String windowAsString = windowStart.toEpochMilli() + "/" + windowEnd.toEpochMilli();
+
+		return windowAsString;
+
+	}
+
+	public static String getQuarterHourWindowAsString(Windowed<Long> windowedKey) {
+
+		String windowAsString = windowedKey.window().start() + "/" + windowedKey.window().end();
 
 		return windowAsString;
 

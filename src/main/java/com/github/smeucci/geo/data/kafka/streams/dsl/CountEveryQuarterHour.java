@@ -1,20 +1,26 @@
 package com.github.smeucci.geo.data.kafka.streams.dsl;
 
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Named;
 import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.streams.kstream.Suppressed;
 import org.apache.kafka.streams.kstream.TimeWindows;
+import org.apache.kafka.streams.kstream.Windowed;
+import org.apache.kafka.streams.processor.PunctuationType;
 import org.apache.kafka.streams.state.KeyValueBytesStoreSupplier;
 import org.apache.kafka.streams.state.Stores;
 import org.apache.kafka.streams.state.WindowBytesStoreSupplier;
 
 import com.github.smeucci.geo.data.kafka.config.GeoDataConfig;
+import com.github.smeucci.geo.data.kafka.streams.processor.AggregateQuarterHourCountByWindowProcessor;
 import com.github.smeucci.geo.data.kafka.utils.GeoDataUtils;
 
 public class CountEveryQuarterHour {
@@ -62,6 +68,64 @@ public class CountEveryQuarterHour {
 	}
 
 	public static void countByIdAndAggregate(final KStream<Long, String> geoDataStream) {
+
+		WindowBytesStoreSupplier countEveryQuarterHourByIdStoreSupplier = Stores.inMemoryWindowStore(
+				GeoDataConfig.Store.COUNT_EVERY_QUARTES_HOUR_BY_ID.storeName(), Duration.ofDays(1),
+				Duration.ofMinutes(15), false);
+
+		KeyValueBytesStoreSupplier countEveryQuarterHourStoreSupplier = Stores
+				.inMemoryKeyValueStore(GeoDataConfig.Store.COUNT_EVERY_QUARTES_HOUR.storeName());
+
+		geoDataStream
+				// group by key, i.e. the id of the geo data record
+				.groupByKey(Grouped.with(GeoDataConfig.Operator.GROUP_BY_GEO_DATA_ID.operatorName(), Serdes.Long(),
+						Serdes.String()))
+				// set hopping window of size 15 min with implicit hop size of 15 min, no overlap
+				.windowedBy(TimeWindows.of(Duration.ofMinutes(15)).grace(Duration.ofMinutes(0)))
+				// count occurrences in windows by group
+				.count(Named.as(GeoDataConfig.Operator.COUNT_EVERY_QUARTES_HOUR_BY_ID.operatorName()),
+						Materialized.as(countEveryQuarterHourByIdStoreSupplier))
+				// group by key -> window time interval as string
+				.groupBy((k, v) -> KeyValue.pair(GeoDataUtils.getQuarterHourWindowAsString(k), v),
+						Grouped.with(GeoDataConfig.Operator.GROUP_BY_QUARTER_HOUR.operatorName(), Serdes.String(),
+								Serdes.Long()))
+				// reduce -> sum count by obu in window
+				.reduce((aggVal, newVal) -> aggVal + newVal, (aggVal, oldVal) -> aggVal - oldVal,
+						Materialized.as(countEveryQuarterHourStoreSupplier))
+				// suppress
+				.suppress(Suppressed.untilTimeLimit(Duration.ofMinutes(15), Suppressed.BufferConfig.unbounded()))
+				// to stream
+				.toStream(Named.as(GeoDataConfig.Operator.TO_COUNT_EVERY_QUARTER_HOUR_STREAM.operatorName()))
+				// to topic
+				.to(GeoDataConfig.Topic.COUNT_EVERY_QUARTER_HOUR_GEO_DATA.topicName(),
+						Produced.as(GeoDataConfig.Operator.TO_COUNT_EVERY_QUARTER_HOUR_TOPIC.operatorName()));
+
+	}
+
+	public static void countByIdAndAggregate2(final KStream<Long, String> geoDataStream) {
+
+		WindowBytesStoreSupplier countEveryQuarterHourByIdStoreSupplier = Stores.inMemoryWindowStore(
+				GeoDataConfig.Store.COUNT_EVERY_QUARTES_HOUR_BY_ID.storeName(), Duration.ofDays(1),
+				Duration.ofMinutes(15), false);
+
+		// count by id for each window
+		KTable<Windowed<Long>, Long> countByIdTable = geoDataStream
+				// group by key, i.e. the id of the geo data record
+				.groupByKey(Grouped.with(GeoDataConfig.Operator.GROUP_BY_GEO_DATA_ID.operatorName(), Serdes.Long(),
+						Serdes.String()))
+				// set hopping window of size 15 min with implicit hop size of 15 min, no overlap
+				.windowedBy(TimeWindows.of(Duration.ofMinutes(15)).grace(Duration.ZERO))
+				// count occurrences in windows by group
+				.count(Named.as(GeoDataConfig.Operator.COUNT_EVERY_QUARTES_HOUR_BY_ID.operatorName()),
+						Materialized.as(countEveryQuarterHourByIdStoreSupplier));
+
+		// aggregate (sum) results by window for each id
+		countByIdTable
+				// to stream
+				.toStream()
+				// to topic
+				.process(() -> new AggregateQuarterHourCountByWindowProcessor(),
+						GeoDataConfig.Store.COUNT_EVERY_QUARTES_HOUR_BY_ID.storeName());
 
 	}
 
