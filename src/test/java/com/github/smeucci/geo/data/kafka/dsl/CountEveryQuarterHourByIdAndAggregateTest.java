@@ -218,11 +218,13 @@ public class CountEveryQuarterHourByIdAndAggregateTest {
 		// the corresponding window will contain no results, i.e. count = 0
 		Assertions.assertEquals(5, records.size());
 
-		records.stream().filter(r -> r.value != 0).forEach(r -> {
+		records.stream().forEach(r -> {
 
 			log.info("{}", r);
 
-			Assertions.assertEquals(15, r.value);
+			if (r.value != 0) {
+				Assertions.assertEquals(15, r.value);
+			}
 
 		});
 
