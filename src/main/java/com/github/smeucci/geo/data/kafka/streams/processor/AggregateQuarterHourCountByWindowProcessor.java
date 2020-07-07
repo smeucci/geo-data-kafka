@@ -9,16 +9,13 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.kstream.Window;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.processor.Processor;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.processor.PunctuationType;
-import org.apache.kafka.streams.processor.To;
 import org.apache.kafka.streams.state.KeyValueIterator;
 import org.apache.kafka.streams.state.TimestampedWindowStore;
 import org.apache.kafka.streams.state.ValueAndTimestamp;
-import org.apache.kafka.streams.state.WindowStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +75,7 @@ public class AggregateQuarterHourCountByWindowProcessor implements Processor<Win
 
 			// forward to topic
 			Long total = windowMap.get(from.toEpochMilli());
-			
+
 			if (total != null) {
 				context.forward(from.toEpochMilli(), total);
 			}
