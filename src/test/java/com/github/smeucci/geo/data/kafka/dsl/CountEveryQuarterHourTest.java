@@ -154,8 +154,8 @@ public class CountEveryQuarterHourTest {
 
 			KeyValue<Windowed<Long>, ValueAndTimestamp<Long>> keyVal = iterator.next();
 
-			String aggKey = keyVal.key.window().startTime().toString() + " @ "
-					+ keyVal.key.window().endTime().toString();
+			String aggKey = "[" + keyVal.key.window().startTime().toString() + ", "
+					+ keyVal.key.window().endTime().toString() + "]";
 
 			log.info("{}: {}", aggKey, keyVal.value.value());
 
