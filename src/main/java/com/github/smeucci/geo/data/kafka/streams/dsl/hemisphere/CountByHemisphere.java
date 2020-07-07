@@ -1,4 +1,4 @@
-package com.github.smeucci.geo.data.kafka.streams.dsl;
+package com.github.smeucci.geo.data.kafka.streams.dsl.hemisphere;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.kstream.Grouped;

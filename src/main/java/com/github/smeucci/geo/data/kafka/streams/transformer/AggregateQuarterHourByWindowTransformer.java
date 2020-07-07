@@ -46,9 +46,13 @@ public class AggregateQuarterHourByWindowTransformer
 
 			KeyValueIterator<Windowed<Long>, ValueAndTimestamp<Long>> iterator = this.store.fetchAll(from, from);
 
-			Long total = 0l;
+			Long total = null;
 
 			while (iterator.hasNext()) {
+
+				if (total == null) {
+					total = 0l;
+				}
 
 				total += iterator.next().value.value();
 
@@ -60,6 +64,8 @@ public class AggregateQuarterHourByWindowTransformer
 			if (total != null) {
 				context.forward(from.toEpochMilli(), total);
 			}
+
+			// TODO context.commit ?
 
 		});
 

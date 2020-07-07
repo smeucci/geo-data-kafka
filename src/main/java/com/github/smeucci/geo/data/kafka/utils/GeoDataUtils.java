@@ -1,5 +1,6 @@
 package com.github.smeucci.geo.data.kafka.utils;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -72,11 +73,70 @@ public class GeoDataUtils {
 
 	}
 
+	public static Long getQuarterHourStartWindowAsLong(String record) {
+
+		Optional<GeoData> optGeoData = converter.fromJson(record);
+
+		if (optGeoData.isEmpty()) {
+			return null;
+		}
+
+		ZonedDateTime geoDataTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(optGeoData.get().timestamp()),
+				ZoneOffset.UTC);
+
+		int quarter = geoDataTime.getMinute() - (geoDataTime.getMinute() % 15);
+
+		Instant windowStart = geoDataTime.withMinute(quarter).withSecond(0).withNano(0).toInstant();
+
+		return windowStart.toEpochMilli();
+
+	}
+
 	public static String getQuarterHourWindowAsString(Windowed<Long> windowedKey) {
 
 		String windowAsString = windowedKey.window().start() + "/" + windowedKey.window().end();
 
 		return windowAsString;
+
+	}
+
+	public static Instant inferQuarterHourStartTimeFromPuctuate(long timestamp, Duration gracePeriod) {
+
+		ZonedDateTime punctuateTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneOffset.UTC);
+
+		ZonedDateTime closeWindowTime = punctuateTime.minusMinutes(15);
+
+		if (gracePeriod != null) {
+			closeWindowTime.minusMinutes(gracePeriod.toMinutes());
+		}
+
+		int closeWindowQuarter = (int) (closeWindowTime.getMinute() - (closeWindowTime.getMinute() % 15));
+
+		Instant start = closeWindowTime.withMinute(closeWindowQuarter).withSecond(0).withNano(0).toInstant();
+
+		return start;
+
+	}
+
+	public static Instant inferQuarterHourStartTimeFromQuery(long timestamp) {
+
+		ZonedDateTime queryTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneOffset.UTC);
+
+		int queryQuarter = (int) (queryTime.getMinute() - (queryTime.getMinute() % 15));
+
+		Instant start = queryTime.withMinute(queryQuarter).withSecond(0).withNano(0).toInstant();
+
+		return start;
+
+	}
+
+	public static Instant inferHalfHourStartTimeFromQuery(long timestamp) {
+
+		ZonedDateTime queryTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneOffset.UTC);
+
+		Instant start = queryTime.minusMinutes(30).withSecond(0).withNano(0).toInstant();
+
+		return start;
 
 	}
 

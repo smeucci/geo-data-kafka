@@ -214,9 +214,7 @@ public class CountEveryQuarterHourByIdAndAggregateTest {
 
 		List<KeyValue<Long, Long>> records = outputTopic.readKeyValuesToList();
 
-		// returns one record more, because the first puntuaction happen as soon as the first record arrives
-		// the corresponding window will contain no results, i.e. count = 0
-		Assertions.assertEquals(5, records.size());
+		Assertions.assertEquals(4, records.size());
 
 		records.stream().forEach(r -> {
 

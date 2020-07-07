@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
@@ -17,6 +18,7 @@ import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.TopologyTestDriver;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.state.KeyValueIterator;
+import org.apache.kafka.streams.state.ValueAndTimestamp;
 import org.apache.kafka.streams.state.WindowStore;
 import org.apache.kafka.streams.test.TestRecord;
 import org.junit.jupiter.api.AfterEach;
@@ -34,6 +36,7 @@ import com.github.smeucci.geo.data.kafka.config.GeoDataConfig;
 import com.github.smeucci.geo.data.kafka.config.GeoDataConfig.Topic;
 import com.github.smeucci.geo.data.kafka.streams.dsl.CountEveryQuarterHour;
 import com.github.smeucci.geo.data.kafka.topology.GeoDataTopology;
+import com.github.smeucci.geo.data.kafka.utils.GeoDataUtils;
 import com.github.smeucci.geo.data.kafka.utils.UtilityForTest;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -97,10 +100,10 @@ public class CountEveryQuarterHourByIdTest {
 
 		log.info("Querying the geo data count every quarter hour by id state store");
 
-		WindowStore<Long, Long> store = testDriver
-				.getWindowStore(GeoDataConfig.Store.COUNT_EVERY_QUARTES_HOUR_BY_ID.storeName());
+		WindowStore<Long, ValueAndTimestamp<Long>> store = testDriver
+				.getTimestampedWindowStore(GeoDataConfig.Store.COUNT_EVERY_QUARTES_HOUR_BY_ID.storeName());
 
-		KeyValueIterator<Windowed<Long>, Long> iterator = store.all();
+		KeyValueIterator<Windowed<Long>, ValueAndTimestamp<Long>> iterator = store.all();
 
 		// aggregate results by window
 
@@ -108,13 +111,14 @@ public class CountEveryQuarterHourByIdTest {
 
 		while (iterator.hasNext()) {
 
-			KeyValue<Windowed<Long>, Long> keyVal = iterator.next();
+			KeyValue<Windowed<Long>, ValueAndTimestamp<Long>> keyVal = iterator.next();
 
-			String aggKey = keyVal.key.window().start() + "/" + keyVal.key.window().end();
+			String aggKey = keyVal.key.window().startTime().toString() + " @ "
+					+ keyVal.key.window().endTime().toString();
 
 			Long sum = aggregateResultsByWindow.get(aggKey);
 
-			sum = sum == null ? keyVal.value : sum + keyVal.value;
+			sum = sum == null ? keyVal.value.value() : sum + keyVal.value.value();
 
 			aggregateResultsByWindow.put(aggKey, sum);
 
@@ -122,30 +126,29 @@ public class CountEveryQuarterHourByIdTest {
 
 		iterator.close();
 
-		log.info("Show aggregated results by window:");
+		log.info("-- Show aggregated results by window:");
 		aggregateResultsByWindow.entrySet().forEach(e -> log.info("{}", e));
 
 		// check window already closed
 
 		ZonedDateTime queryTime = ZonedDateTime.of(2020, 1, 1, 00, 43, 23, 12565650, ZoneOffset.UTC);
 
-		log.info("Query Time: {}", queryTime);
+		log.info("-- Query Time: {}", queryTime);
 
-		int quarter = queryTime.getMinute() - (queryTime.getMinute() % 15);
-		Instant from = queryTime.withMinute(quarter).withSecond(0).withNano(0).toInstant();
-		Instant to = from;
+		Instant startWindow = GeoDataUtils.inferQuarterHourStartTimeFromQuery(queryTime.toInstant().toEpochMilli());
 
-		log.info("Search Window: [{}, {}]", from, to);
+		log.info("Search Window: [{}, {}]", startWindow, startWindow.plus(15, ChronoUnit.MINUTES));
 
-		KeyValueIterator<Windowed<Long>, Long> firstWindowIterator = store.fetchAll(from, to);
+		KeyValueIterator<Windowed<Long>, ValueAndTimestamp<Long>> firstWindowIterator = store.fetchAll(startWindow,
+				startWindow);
 
 		log.info("Iterating over select window entries...");
 
 		long firstWindowCount = 0;
 
 		while (firstWindowIterator.hasNext()) {
-			KeyValue<Windowed<Long>, Long> wKeyValue = firstWindowIterator.next();
-			firstWindowCount += wKeyValue.value;
+			KeyValue<Windowed<Long>, ValueAndTimestamp<Long>> wKeyValue = firstWindowIterator.next();
+			firstWindowCount += wKeyValue.value.value();
 		}
 
 		firstWindowIterator.close();
@@ -158,23 +161,22 @@ public class CountEveryQuarterHourByIdTest {
 
 		queryTime = ZonedDateTime.of(2020, 1, 1, 01, 04, 43, 53265650, ZoneOffset.UTC);
 
-		log.info("Query Time: {}", queryTime);
+		log.info("-- Query Time: {}", queryTime);
 
-		quarter = queryTime.getMinute() - (queryTime.getMinute() % 15);
-		from = queryTime.withMinute(quarter).withSecond(0).withNano(0).toInstant();
-		to = from;
+		startWindow = GeoDataUtils.inferQuarterHourStartTimeFromQuery(queryTime.toInstant().toEpochMilli());
 
-		log.info("Search Window: [{}, {}]", from, to);
+		log.info("Search Window: [{}, {}]", startWindow, startWindow.plus(15, ChronoUnit.MINUTES));
 
-		KeyValueIterator<Windowed<Long>, Long> secondWindowIterator = store.fetchAll(from, to);
+		KeyValueIterator<Windowed<Long>, ValueAndTimestamp<Long>> secondWindowIterator = store.fetchAll(startWindow,
+				startWindow);
 
 		log.info("Iterating over selected window entries...");
 
 		long secondWindowCount = 0;
 
 		while (secondWindowIterator.hasNext()) {
-			KeyValue<Windowed<Long>, Long> wKeyValue = secondWindowIterator.next();
-			secondWindowCount += wKeyValue.value;
+			KeyValue<Windowed<Long>, ValueAndTimestamp<Long>> wKeyValue = secondWindowIterator.next();
+			secondWindowCount += wKeyValue.value.value();
 		}
 
 		secondWindowIterator.close();
