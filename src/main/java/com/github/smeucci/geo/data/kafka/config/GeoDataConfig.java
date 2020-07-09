@@ -7,7 +7,6 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.StreamsConfig;
 
@@ -68,7 +67,8 @@ public final class GeoDataConfig {
 		COUNT_LAST_30_MINUTES_BY_ID("count-last-30-minutes-by-id-store"),
 		COUNT_EVERY_QUARTES_HOUR_BY_ID("count-every-quarter-hour-by-id-store"),
 		COUNT_LAST_30_MINUTES("count-last-30-minutes-store"),
-		COUNT_EVERY_QUARTES_HOUR("count-every-quarter-hour-store");
+		COUNT_EVERY_QUARTES_HOUR("count-every-quarter-hour-store"),
+		TASK_BOOKMARK("task-bookmark-store");
 
 		private final String store;
 
@@ -136,7 +136,7 @@ public final class GeoDataConfig {
 		properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 		properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, GeoDataConfig.Server.KAFKA.address());
 		properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "consumer-count-windowed-geo-data");
-		properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+		properties.setProperty(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class.getName());
 		properties.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class.getName());
 
 		return properties;

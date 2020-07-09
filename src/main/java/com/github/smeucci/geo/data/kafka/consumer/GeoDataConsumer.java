@@ -7,7 +7,6 @@ import java.util.Properties;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.streams.kstream.Windowed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +22,7 @@ public class GeoDataConsumer {
 		Properties properties = GeoDataConfig.consumerProperties();
 
 		// create the producer
-		KafkaConsumer<Windowed<String>, Long> consumer = new KafkaConsumer<Windowed<String>, Long>(properties);
+		KafkaConsumer<Long, Long> consumer = new KafkaConsumer<Long, Long>(properties);
 
 		consumer.subscribe(Arrays.asList(GeoDataConfig.Topic.COUNT_EVERY_QUARTER_HOUR_GEO_DATA.topicName()));
 
@@ -32,9 +31,9 @@ public class GeoDataConsumer {
 
 		while (true) {
 
-			ConsumerRecords<Windowed<String>, Long> records = consumer.poll(Duration.ofSeconds(1));
+			ConsumerRecords<Long, Long> records = consumer.poll(Duration.ofSeconds(1));
 
-			for (ConsumerRecord<Windowed<String>, Long> record : records) {
+			for (ConsumerRecord<Long, Long> record : records) {
 
 				log.info("key: {}, value: {}", record.key(), record.value());
 

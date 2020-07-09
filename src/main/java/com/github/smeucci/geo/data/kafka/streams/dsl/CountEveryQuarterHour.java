@@ -64,7 +64,7 @@ public class CountEveryQuarterHour {
 		WindowBytesStoreSupplier countEveryQuarterHourStoreSupplier = Stores.inMemoryWindowStore(
 				GeoDataConfig.Store.COUNT_EVERY_QUARTES_HOUR.storeName(), Duration.ofDays(1), Duration.ofMinutes(15),
 				false);
-
+		
 		geoDataStream
 				// change key -> time interval it belongs to
 				.selectKey((k, v) -> GeoDataUtils.getQuarterHourStartWindowAsLong(v),
@@ -76,13 +76,14 @@ public class CountEveryQuarterHour {
 				.windowedBy(TimeWindows.of(Duration.ofMinutes(15)).grace(Duration.ZERO))
 				// count occurrences in windows
 				.count(Named.as(GeoDataConfig.Operator.COUNT_EVERY_QUARTER_HOUR.operatorName()),
-						Materialized.as(countEveryQuarterHourStoreSupplier))
+						Materialized.as(countEveryQuarterHourStoreSupplier)) // TODO reduce flag committato oggetto composito + wall clock punctuate
 				// to stream
 				.toStream(Named.as(GeoDataConfig.Operator.TO_COUNT_EVERY_QUARTER_HOUR_STREAM.operatorName()))
 				// to topic
 				.transform(() -> new ExtractWindowedKeyTransformer(),
 						Named.as(GeoDataConfig.Operator.EXTRACT_WINDOWED_KEY_TRANSFORMER.operatorName()),
-						GeoDataConfig.Store.COUNT_EVERY_QUARTES_HOUR.storeName())
+						GeoDataConfig.Store.COUNT_EVERY_QUARTES_HOUR.storeName(),
+						GeoDataConfig.Store.TASK_BOOKMARK.storeName())
 				// to topic
 				.to(GeoDataConfig.Topic.COUNT_EVERY_QUARTER_HOUR_GEO_DATA.topicName(),
 						Produced.with(Serdes.Long(), Serdes.Long())

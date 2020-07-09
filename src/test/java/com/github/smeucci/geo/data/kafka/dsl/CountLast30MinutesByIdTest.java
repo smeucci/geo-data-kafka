@@ -134,7 +134,7 @@ public class CountLast30MinutesByIdTest {
 
 		log.info("-- Query Time: {}", queryTime);
 
-		Instant startWindow = GeoDataUtils.inferHalfHourStartTimeFromQuery(queryTime.toInstant().toEpochMilli());
+		Instant startWindow = GeoDataUtils.inferPreviousHalfHourStartTime(queryTime.toInstant().toEpochMilli());
 
 		log.info("Search Window: [{}, {}]", startWindow, startWindow.plus(30, ChronoUnit.MINUTES));
 
@@ -162,7 +162,7 @@ public class CountLast30MinutesByIdTest {
 
 		log.info("-- Query Time: {}", queryTime);
 
-		startWindow = GeoDataUtils.inferHalfHourStartTimeFromQuery(queryTime.toInstant().toEpochMilli());
+		startWindow = GeoDataUtils.inferPreviousHalfHourStartTime(queryTime.toInstant().toEpochMilli());
 
 		log.info("Search Window: [{}, {}]", startWindow, startWindow.plus(30, ChronoUnit.MINUTES));
 

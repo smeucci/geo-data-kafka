@@ -135,7 +135,7 @@ public class CountEveryQuarterHourByIdTest {
 
 		log.info("-- Query Time: {}", queryTime);
 
-		Instant startWindow = GeoDataUtils.inferQuarterHourStartTimeFromQuery(queryTime.toInstant().toEpochMilli());
+		Instant startWindow = GeoDataUtils.inferCurrentQuarterHourStartTime(queryTime.toInstant().toEpochMilli());
 
 		log.info("Search Window: [{}, {}]", startWindow, startWindow.plus(15, ChronoUnit.MINUTES));
 
@@ -163,7 +163,7 @@ public class CountEveryQuarterHourByIdTest {
 
 		log.info("-- Query Time: {}", queryTime);
 
-		startWindow = GeoDataUtils.inferQuarterHourStartTimeFromQuery(queryTime.toInstant().toEpochMilli());
+		startWindow = GeoDataUtils.inferCurrentQuarterHourStartTime(queryTime.toInstant().toEpochMilli());
 
 		log.info("Search Window: [{}, {}]", startWindow, startWindow.plus(15, ChronoUnit.MINUTES));
 

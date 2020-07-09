@@ -100,7 +100,7 @@ public class GeoDataUtils {
 
 	}
 
-	public static Instant inferQuarterHourStartTimeFromPuctuate(long timestamp, Duration gracePeriod) {
+	public static Instant inferPreviousQuarterHourStartTime(long timestamp, Duration gracePeriod) {
 
 		ZonedDateTime punctuateTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneOffset.UTC);
 
@@ -118,7 +118,7 @@ public class GeoDataUtils {
 
 	}
 
-	public static Instant inferQuarterHourStartTimeFromQuery(long timestamp) {
+	public static Instant inferCurrentQuarterHourStartTime(long timestamp) {
 
 		ZonedDateTime queryTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneOffset.UTC);
 
@@ -130,7 +130,7 @@ public class GeoDataUtils {
 
 	}
 
-	public static Instant inferHalfHourStartTimeFromQuery(long timestamp) {
+	public static Instant inferPreviousHalfHourStartTime(long timestamp) {
 
 		ZonedDateTime queryTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneOffset.UTC);
 
