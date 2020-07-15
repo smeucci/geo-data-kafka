@@ -17,8 +17,11 @@ import org.apache.kafka.streams.state.Stores;
 import org.apache.kafka.streams.state.WindowBytesStoreSupplier;
 
 import com.github.smeucci.geo.data.kafka.config.GeoDataConfig;
+import com.github.smeucci.geo.data.kafka.record.CountWrapper;
+import com.github.smeucci.geo.data.kafka.serde.CountWrapperSerde;
 import com.github.smeucci.geo.data.kafka.streams.transformer.AggregateQuarterHourByWindowTransformer;
 import com.github.smeucci.geo.data.kafka.streams.transformer.ExtractWindowedKeyTransformer;
+import com.github.smeucci.geo.data.kafka.streams.transformer.ExtractWindowedKeyTransformer2;
 import com.github.smeucci.geo.data.kafka.utils.GeoDataUtils;
 
 public class CountEveryQuarterHour {
@@ -64,7 +67,7 @@ public class CountEveryQuarterHour {
 		WindowBytesStoreSupplier countEveryQuarterHourStoreSupplier = Stores.inMemoryWindowStore(
 				GeoDataConfig.Store.COUNT_EVERY_QUARTES_HOUR.storeName(), Duration.ofDays(1), Duration.ofMinutes(15),
 				false);
-		
+
 		geoDataStream
 				// change key -> time interval it belongs to
 				.selectKey((k, v) -> GeoDataUtils.getQuarterHourStartWindowAsLong(v),
@@ -76,7 +79,8 @@ public class CountEveryQuarterHour {
 				.windowedBy(TimeWindows.of(Duration.ofMinutes(15)).grace(Duration.ZERO))
 				// count occurrences in windows
 				.count(Named.as(GeoDataConfig.Operator.COUNT_EVERY_QUARTER_HOUR.operatorName()),
-						Materialized.as(countEveryQuarterHourStoreSupplier)) // TODO reduce flag committato oggetto composito + wall clock punctuate
+						Materialized.as(countEveryQuarterHourStoreSupplier)) // TODO reduce flag committato oggetto
+																				// composito + wall clock punctuate
 				// to stream
 				.toStream(Named.as(GeoDataConfig.Operator.TO_COUNT_EVERY_QUARTER_HOUR_STREAM.operatorName()))
 				// to topic
@@ -84,6 +88,46 @@ public class CountEveryQuarterHour {
 						Named.as(GeoDataConfig.Operator.EXTRACT_WINDOWED_KEY_TRANSFORMER.operatorName()),
 						GeoDataConfig.Store.COUNT_EVERY_QUARTES_HOUR.storeName(),
 						GeoDataConfig.Store.TASK_BOOKMARK.storeName())
+				// to topic
+				.to(GeoDataConfig.Topic.COUNT_EVERY_QUARTER_HOUR_GEO_DATA.topicName(),
+						Produced.with(Serdes.Long(), Serdes.Long())
+								.withName(GeoDataConfig.Operator.TO_COUNT_EVERY_QUARTER_HOUR_TOPIC.operatorName()));
+
+	}
+
+	/**
+	 * Non viene usato il bookmark store
+	 * 
+	 * @param geoDataStream
+	 */
+	public static void count2(final KStream<Long, String> geoDataStream) {
+
+		WindowBytesStoreSupplier countEveryQuarterHourStoreSupplier = Stores.inMemoryWindowStore(
+				GeoDataConfig.Store.COUNT_EVERY_QUARTES_HOUR.storeName(), Duration.ofDays(1), Duration.ofMinutes(15),
+				false);
+
+		geoDataStream
+				// change key -> time interval it belongs to
+				.selectKey((k, v) -> GeoDataUtils.getQuarterHourStartWindowAsLong(v),
+						Named.as(GeoDataConfig.Operator.SELECT_KEY_QUARTER_HOUR.operatorName()))
+				// map values
+				.mapValues((v) -> new CountWrapper(),
+						Named.as(GeoDataConfig.Operator.MAP_VALUES_COUNT_WRAPPER.operatorName()))
+				// group by key
+				.groupByKey(Grouped.with(GeoDataConfig.Operator.GROUP_BY_QUARTER_HOUR.operatorName(), Serdes.Long(),
+						Serdes.serdeFrom(new CountWrapperSerde(), new CountWrapperSerde())))
+				// set hopping window of size 15 min with implicit hop size of 15 min, no overlap
+				.windowedBy(TimeWindows.of(Duration.ofMinutes(15)).grace(Duration.ZERO))
+				// aggregate occurrences in windows
+				.reduce((aggValue, newValue) -> aggValue.plusOne(),
+						Named.as(GeoDataConfig.Operator.REDUCE_EVERY_QUARTER_HOUR.operatorName()),
+						Materialized.as(countEveryQuarterHourStoreSupplier))
+				// to stream
+				.toStream(Named.as(GeoDataConfig.Operator.TO_COUNT_EVERY_QUARTER_HOUR_STREAM.operatorName()))
+				// to topic
+				.transform(() -> new ExtractWindowedKeyTransformer2(),
+						Named.as(GeoDataConfig.Operator.EXTRACT_WINDOWED_KEY_TRANSFORMER.operatorName()),
+						GeoDataConfig.Store.COUNT_EVERY_QUARTES_HOUR.storeName())
 				// to topic
 				.to(GeoDataConfig.Topic.COUNT_EVERY_QUARTER_HOUR_GEO_DATA.topicName(),
 						Produced.with(Serdes.Long(), Serdes.Long())

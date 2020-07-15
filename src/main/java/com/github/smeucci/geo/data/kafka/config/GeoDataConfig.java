@@ -98,12 +98,14 @@ public final class GeoDataConfig {
 		COUNT_EVERY_QUARTER_HOUR_BY_ID("count-every-quarter-hour-by-id-operator"),
 		COUNT_EVERY_QUARTER_HOUR("count-every-quarter-hour-operator"),
 		REDUCE_LAST_30_MINUTES("reduce-last-30-minutes-operator"),
+		REDUCE_EVERY_QUARTER_HOUR("reduce-every-quarter-hour-operator"),
 		SELECT_KEY_ALL_SAME("select-key-all-same-operator"),
 		SELECT_KEY_QUARTER_HOUR("select-key-quarter-hour-operator"),
 		TO_COUNT_EVERY_QUARTER_HOUR_STREAM("to-count-quarter-hour-stream-operator"),
 		TO_COUNT_EVERY_QUARTER_HOUR_TOPIC("to-count-quarter-hour-topic-operator"),
 		AGGREGATE_BY_WINDOW_TRANSFORMER("aggregate-by-window-transformer-operator"),
-		EXTRACT_WINDOWED_KEY_TRANSFORMER("extract-windowed-key-transformer");
+		EXTRACT_WINDOWED_KEY_TRANSFORMER("extract-windowed-key-transformer"),
+		MAP_VALUES_COUNT_WRAPPER("map-value-count-wrapper-operator");
 
 		private final String operator;
 

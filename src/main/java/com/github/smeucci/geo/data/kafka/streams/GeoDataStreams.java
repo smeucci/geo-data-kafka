@@ -26,7 +26,7 @@ public class GeoDataStreams {
 		Topology topology = new GeoDataTopology(Topic.SOURCE_GEO_DATA) //
 				.addOperator(CountLast30Minutes::countById) //
 				.addOperator(CountEveryQuarterHour::countById) //
-				.addOperator(CountEveryQuarterHour::count) //
+				.addOperator(CountEveryQuarterHour::count2) //
 				.build();
 
 		// print topology
